@@ -19,10 +19,14 @@ export type BlockType =
   | 'footer'
   | 'simpleFooter';
 
+export interface BlockProps {
+  [key: string]: string | number | boolean | undefined;
+}
+
 export interface Block {
   id: string;
   type: BlockType;
-  props: Record<string, any>;
+  props: BlockProps;
 }
 
 interface EditorState {
@@ -30,7 +34,7 @@ interface EditorState {
   selectedBlockId: string | null;
   addBlock: (type: BlockType) => void;
   removeBlock: (id: string) => void;
-  updateBlock: (id: string, props: Record<string, any>) => void;
+  updateBlock: (id: string, props: BlockProps) => void;
   reorderBlocks: (startIndex: number, endIndex: number) => void;
   setSelectedBlock: (id: string | null) => void;
 }

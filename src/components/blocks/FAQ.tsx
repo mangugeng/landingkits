@@ -1,3 +1,7 @@
+'use client';
+
+import { useState } from 'react';
+
 interface FAQItem {
   question: string;
   answer: string;
@@ -11,69 +15,123 @@ interface FAQProps {
   background?: 'white' | 'gray';
 }
 
-const defaultItems = [
+const defaultItems: FAQItem[] = [
   {
-    question: "What's included in the free plan?",
-    answer: "The free plan includes all the basic features you need to get started, including one landing page, basic components, and community support.",
+    question: 'Is there a free plan available?',
+    answer:
+      'Yes, we offer a free plan that includes basic features. You can use it as long as you want with no obligation to upgrade.',
   },
   {
-    question: "How do I upgrade my plan?",
-    answer: "You can upgrade your plan at any time from your account settings. Choose the plan that best fits your needs and enter your payment information.",
+    question: 'Can I change my plan later?',
+    answer:
+      'Absolutely! You can upgrade or downgrade your plan at any time. Changes to billing will be prorated.',
   },
   {
-    question: "Can I cancel my subscription?",
-    answer: "Yes, you can cancel your subscription at any time. You'll continue to have access to your plan until the end of your billing period.",
+    question: 'How do I cancel my subscription?',
+    answer:
+      'You can cancel your subscription at any time from your account settings. Once cancelled, you\'ll have access until the end of your billing period.',
   },
   {
-    question: "Do you offer custom solutions?",
-    answer: "Yes, we offer custom solutions for enterprise customers. Contact our sales team to learn more about our enterprise plans.",
+    question: 'Do you offer custom solutions?',
+    answer:
+      'Yes, we provide custom solutions for enterprises. Contact our sales team to discuss your specific needs.',
   },
   {
-    question: "How do I get support?",
-    answer: "We offer support through our community forum, email, and live chat. Enterprise customers get priority support with dedicated response times.",
+    question: 'What kind of support do you offer?',
+    answer:
+      'We offer 24/7 email support for all plans, and priority phone support for premium plans. Our average response time is under 2 hours.',
   },
   {
-    question: "What payment methods do you accept?",
-    answer: "We accept all major credit cards, PayPal, and bank transfers for annual plans. Enterprise customers can also pay by invoice.",
+    question: 'Which payment methods do you accept?',
+    answer:
+      'We accept all major credit cards (Visa, MasterCard, American Express), PayPal, and bank transfers for annual plans.',
   },
 ];
 
 const FAQ = ({
-  sectionTitle = "Frequently Asked Questions",
-  sectionDescription = "Find answers to common questions about our platform",
+  sectionTitle = 'Frequently asked questions',
+  sectionDescription = 'Find answers to common questions about our services.',
   items = defaultItems,
   layout = 'grid',
   background = 'white',
 }: FAQProps) => {
-  const bgColor = background === 'white' ? 'bg-white' : 'bg-gray-50';
+  const [openItems, setOpenItems] = useState<number[]>([]);
+
+  const toggleItem = (index: number) => {
+    setOpenItems((current) =>
+      current.includes(index)
+        ? current.filter((i) => i !== index)
+        : [...current, index]
+    );
+  };
+
+  const isItemOpen = (index: number) => openItems.includes(index);
 
   return (
-    <div className={`${bgColor} py-12 sm:py-16`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center">
-          <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+    <div
+      className={`${
+        background === 'gray' ? 'bg-gray-50' : 'bg-white'
+      } py-24 sm:py-32`}
+    >
+      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        <div className="mx-auto max-w-4xl text-center">
+          <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
             {sectionTitle}
           </h2>
-          <p className="mt-3 max-w-2xl mx-auto text-xl text-gray-500">
-            {sectionDescription}
-          </p>
+          {sectionDescription && (
+            <p className="mt-4 text-lg leading-8 text-gray-600">
+              {sectionDescription}
+            </p>
+          )}
         </div>
-        <div className={`mt-12 ${
-          layout === 'grid'
-            ? 'grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3'
-            : 'max-w-3xl mx-auto space-y-8'
-        }`}>
+        <div
+          className={`mx-auto mt-16 max-w-4xl ${
+            layout === 'grid'
+              ? 'grid grid-cols-1 gap-8 sm:grid-cols-2'
+              : 'space-y-8'
+          }`}
+        >
           {items.map((item, index) => (
             <div
               key={index}
-              className={`${background === 'white' ? 'bg-gray-50' : 'bg-white'} rounded-lg p-6 shadow-sm`}
+              className={`${
+                background === 'gray' ? 'bg-white' : 'bg-gray-50'
+              } rounded-2xl px-6 py-4`}
             >
-              <h3 className="text-lg font-medium text-gray-900">
-                {item.question}
-              </h3>
-              <p className="mt-2 text-base text-gray-500">
-                {item.answer}
-              </p>
+              <button
+                onClick={() => toggleItem(index)}
+                className="flex w-full items-start justify-between text-left"
+              >
+                <span className="text-base font-semibold leading-7 text-gray-900">
+                  {item.question}
+                </span>
+                <span className="ml-6 flex h-7 items-center">
+                  <svg
+                    className={`h-6 w-6 transform text-gray-600 transition-transform duration-200 ${
+                      isItemOpen(index) ? 'rotate-180' : ''
+                    }`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth="1.5"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M19.5 8.25l-7.5 7.5-7.5-7.5"
+                    />
+                  </svg>
+                </span>
+              </button>
+              <div
+                className={`mt-2 overflow-hidden transition-all duration-200 ${
+                  isItemOpen(index) ? 'max-h-96' : 'max-h-0'
+                }`}
+              >
+                <p className="text-base leading-7 text-gray-600">
+                  {item.answer}
+                </p>
+              </div>
             </div>
           ))}
         </div>

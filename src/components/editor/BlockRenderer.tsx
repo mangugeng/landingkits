@@ -2,18 +2,28 @@
 
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Block, useEditorStore } from '@/store/editor';
+import { Block, useEditorStore, BlockProps } from '@/store/editor';
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 
-// Dynamic import untuk setiap komponen preview
-const PreviewComponents: Record<string, any> = {
+const components = {
   hero: dynamic(() => import('@/components/blocks/Hero')),
+  navbar: dynamic(() => import('@/components/blocks/Navbar')),
+  header: dynamic(() => import('@/components/blocks/Header')),
   features: dynamic(() => import('@/components/blocks/Features')),
-  pricing: dynamic(() => import('@/components/blocks/Pricing')),
+  content: dynamic(() => import('@/components/blocks/Content')),
+  stats: dynamic(() => import('@/components/blocks/Stats')),
+  team: dynamic(() => import('@/components/blocks/Team')),
+  faq: dynamic(() => import('@/components/blocks/FAQ')),
   testimonials: dynamic(() => import('@/components/blocks/Testimonials')),
+  logos: dynamic(() => import('@/components/blocks/Logos')),
+  reviews: dynamic(() => import('@/components/blocks/Reviews')),
+  pricing: dynamic(() => import('@/components/blocks/Pricing')),
   cta: dynamic(() => import('@/components/blocks/CTA')),
+  newsletter: dynamic(() => import('@/components/blocks/Newsletter')),
+  contact: dynamic(() => import('@/components/blocks/Contact')),
   footer: dynamic(() => import('@/components/blocks/Footer')),
+  simpleFooter: dynamic(() => import('@/components/blocks/SimpleFooter')),
 };
 
 interface BlockRendererProps {
@@ -32,7 +42,6 @@ const BlockRenderer = ({ block }: BlockRendererProps) => {
   });
 
   useEffect(() => {
-    // Trigger enter animation
     const timer = setTimeout(() => setIsNew(false), 50);
     return () => clearTimeout(timer);
   }, []);
@@ -48,7 +57,11 @@ const BlockRenderer = ({ block }: BlockRendererProps) => {
     scale: isNew ? '0.8' : '1',
   };
 
-  const PreviewComponent = PreviewComponents[block.type];
+  const Component = components[block.type];
+
+  if (!Component) {
+    return null;
+  }
 
   return (
     <div
@@ -61,7 +74,7 @@ const BlockRenderer = ({ block }: BlockRendererProps) => {
       <div className="absolute -left-4 top-4 flex flex-col gap-2 z-10">
         <div
           {...listeners}
-          className="w-8 h-8 bg-gray-100 rounded-lg opacity-0 group-hover:opacity-100 cursor-move flex items-center justify-center"
+          className="w-8 h-8 bg-gray-100 rounded-lg opacity-0 group-hover:opacity-100 cursor-move flex items-center justify-center hover:bg-gray-200"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -107,25 +120,14 @@ const BlockRenderer = ({ block }: BlockRendererProps) => {
         useEditorStore.getState().selectedBlockId === block.id ? 'ring-2 ring-blue-500' : ''
       }`}>
         <div className="relative">
-          {PreviewComponent ? (
-            <>
-              <div className={showCode ? 'opacity-25' : ''}>
-                <PreviewComponent {...block.props} />
-              </div>
-              {showCode && (
-                <div className="absolute inset-0 bg-white/90 backdrop-blur-sm p-4 overflow-auto">
-                  <pre className="text-sm font-mono">
-                    <code>{JSON.stringify(block.props, null, 2)}</code>
-                  </pre>
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="p-4">
-              <div className="font-medium text-gray-700">{block.type}</div>
-              <div className="text-sm text-gray-500">
-                Component preview not available
-              </div>
+          <div className={showCode ? 'opacity-25' : ''}>
+            <Component {...(block.props as BlockProps)} />
+          </div>
+          {showCode && (
+            <div className="absolute inset-0 bg-white/90 backdrop-blur-sm p-4 overflow-auto">
+              <pre className="text-sm font-mono">
+                <code>{JSON.stringify(block.props, null, 2)}</code>
+              </pre>
             </div>
           )}
         </div>

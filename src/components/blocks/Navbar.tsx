@@ -1,3 +1,5 @@
+import Image from 'next/image';
+
 interface NavItem {
   label: string;
   href: string;
@@ -33,7 +35,13 @@ const Navbar = ({
         <div className="flex justify-between h-16">
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
-              <img className="h-8 w-auto" src={logo} alt="Logo" />
+              <Image
+                className="h-8 w-auto"
+                src={logo}
+                alt="Logo"
+                width={32}
+                height={32}
+              />
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
               {items.map((item) => (

@@ -1,3 +1,7 @@
+'use client';
+
+import { useEffect, useState, useRef } from 'react';
+
 interface Stat {
   label: string;
   value: string;
@@ -12,89 +16,159 @@ interface StatsProps {
   background?: 'white' | 'gray' | 'blue';
 }
 
-const defaultStats = [
+const defaultStats: Stat[] = [
   {
     label: 'Total Customers',
-    value: '35K+',
-    description: 'Active users worldwide',
+    value: '10000+',
+    description: 'Trusted by businesses worldwide',
   },
   {
     label: 'Revenue Generated',
-    value: '$20M+',
-    description: 'For our customers',
+    value: '$100M+',
+    description: 'For our customers in 2023',
   },
   {
     label: 'Success Rate',
     value: '99.9%',
-    description: 'Customer satisfaction',
+    description: 'System uptime and reliability',
   },
   {
     label: 'Countries',
-    value: '150+',
-    description: 'Global presence',
+    value: '50+',
+    description: 'Global presence and support',
   },
 ];
 
+const useIntersectionObserver = (
+  elementRef: React.RefObject<Element>,
+  { threshold = 0, root = null, rootMargin = '0%' }: IntersectionObserverInit
+): boolean => {
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(entry.isIntersecting);
+      },
+      {
+        threshold,
+        root,
+        rootMargin,
+      }
+    );
+
+    const element = elementRef.current;
+
+    if (element) {
+      observer.observe(element);
+    }
+
+    return () => {
+      if (element) {
+        observer.unobserve(element);
+      }
+    };
+  }, [elementRef, threshold, root, rootMargin]);
+
+  return isVisible;
+};
+
+const AnimatedValue = ({ value }: { value: string }) => {
+  const [displayValue, setDisplayValue] = useState('0');
+  const elementRef = useRef<HTMLDivElement>(null);
+  const isVisible = useIntersectionObserver(elementRef, { threshold: 0.1 });
+  const hasAnimated = useRef(false);
+
+  useEffect(() => {
+    if (isVisible && !hasAnimated.current) {
+      hasAnimated.current = true;
+      
+      const numericValue = parseInt(value.replace(/[^0-9]/g, ''));
+      const prefix = value.match(/^\D+/) || '';
+      const suffix = value.match(/\D+$/) || '';
+      
+      let start = 0;
+      const duration = 2000; // 2 seconds
+      const steps = 60;
+      const increment = numericValue / steps;
+      const stepDuration = duration / steps;
+      
+      const timer = setInterval(() => {
+        start += increment;
+        if (start >= numericValue) {
+          setDisplayValue(`${prefix}${numericValue}${suffix}`);
+          clearInterval(timer);
+        } else {
+          setDisplayValue(`${prefix}${Math.floor(start)}${suffix}`);
+        }
+      }, stepDuration);
+
+      return () => clearInterval(timer);
+    }
+  }, [isVisible, value]);
+
+  return <div ref={elementRef}>{displayValue}</div>;
+};
+
 const Stats = ({
-  sectionTitle = 'Our Impact in Numbers',
-  sectionDescription = 'We've helped thousands of companies achieve their goals',
+  sectionTitle = 'Trusted by companies worldwide',
+  sectionDescription = 'We\'ve helped thousands of organizations achieve their goals',
   stats = defaultStats,
   layout = 'grid',
   background = 'white',
 }: StatsProps) => {
-  const bgColors = {
-    white: 'bg-white',
-    gray: 'bg-gray-50',
-    blue: 'bg-blue-700',
-  };
-
-  const textColors = {
-    white: 'text-gray-900',
-    gray: 'text-gray-900',
-    blue: 'text-white',
-  };
-
-  const descriptionColors = {
-    white: 'text-gray-500',
-    gray: 'text-gray-500',
-    blue: 'text-blue-100',
+  const getBackgroundColor = () => {
+    switch (background) {
+      case 'gray':
+        return 'bg-gray-50';
+      case 'blue':
+        return 'bg-blue-50';
+      default:
+        return 'bg-white';
+    }
   };
 
   return (
-    <div className={`${bgColors[background]} py-12 sm:py-16`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center">
-          <h2 className={`text-3xl font-extrabold ${textColors[background]} sm:text-4xl`}>
+    <div className={`${getBackgroundColor()} py-24 sm:py-32`}>
+      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
             {sectionTitle}
           </h2>
-          <p className={`mt-3 max-w-2xl mx-auto text-xl ${descriptionColors[background]}`}>
-            {sectionDescription}
-          </p>
+          {sectionDescription && (
+            <p className="mt-4 text-lg leading-8 text-gray-600">
+              {sectionDescription}
+            </p>
+          )}
         </div>
-        <div className={`mt-10 ${
-          layout === 'grid'
-            ? 'grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4'
-            : 'flex flex-wrap justify-center gap-8'
-        }`}>
+        <dl
+          className={`mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-10 sm:mt-20 ${
+            layout === 'grid'
+              ? 'sm:grid-cols-2 lg:max-w-none lg:grid-cols-4'
+              : 'lg:max-w-none lg:grid-cols-1'
+          }`}
+        >
           {stats.map((stat) => (
             <div
               key={stat.label}
-              className={`${layout === 'row' ? 'flex-1 min-w-[200px]' : ''} px-4 text-center`}
+              className={`flex flex-col ${
+                layout === 'row'
+                  ? 'lg:flex-row lg:items-baseline lg:gap-x-16'
+                  : ''
+              }`}
             >
-              <p className={`text-4xl font-extrabold ${textColors[background]}`}>
-                {stat.value}
-              </p>
-              <p className={`mt-2 text-lg font-medium ${textColors[background]}`}>
-                {stat.label}
-              </p>
+              <dt className="text-base leading-7 text-gray-600">{stat.label}</dt>
+              <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
+                <AnimatedValue value={stat.value} />
+              </dd>
               {stat.description && (
-                <p className={`mt-1 text-base ${descriptionColors[background]}`}>
+                <p className="mt-2 text-base leading-7 text-gray-600">
                   {stat.description}
                 </p>
               )}
             </div>
           ))}
-        </div>
+        </dl>
       </div>
     </div>
   );

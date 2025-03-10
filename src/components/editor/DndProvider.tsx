@@ -1,83 +1,53 @@
 'use client';
 
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode } from 'react';
 import {
   DndContext,
-  DragEndEvent,
-  DragOverlay,
   MouseSensor,
   TouchSensor,
   useSensor,
   useSensors,
+  DragEndEvent,
+  DragOverlay,
   DragStartEvent,
-  defaultDropAnimation,
 } from '@dnd-kit/core';
-import { BlockType } from '@/store/editor';
+import { useState } from 'react';
 
-interface DndProviderProps {
+interface Props {
   children: ReactNode;
-  onDragEnd: (event: DragEndEvent) => void;
+  onDragEnd?: (event: DragEndEvent) => void;
 }
 
-const DragOverlayContent = ({ type, label }: { type: string; label: string }) => {
-  return (
-    <div className="p-4 bg-white rounded-lg shadow-lg border-2 border-blue-500 cursor-grabbing">
-      {label}
-    </div>
-  );
-};
+const DndProvider = ({ children, onDragEnd }: Props) => {
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [draggedLabel, setDraggedLabel] = useState<string>('');
 
-const DndProvider = ({ children, onDragEnd }: DndProviderProps) => {
-  const [isMounted, setIsMounted] = useState(false);
-  const [activeItem, setActiveItem] = useState<{ type: string; label: string } | null>(null);
+  const mouseSensor = useSensor(MouseSensor, {
+    activationConstraint: {
+      distance: 5,
+    },
+  });
 
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+  const touchSensor = useSensor(TouchSensor, {
+    activationConstraint: {
+      delay: 100,
+      tolerance: 5,
+    },
+  });
 
-  const sensors = useSensors(
-    useSensor(MouseSensor, {
-      activationConstraint: {
-        distance: 5,
-      },
-    }),
-    useSensor(TouchSensor, {
-      activationConstraint: {
-        delay: 100,
-        tolerance: 5,
-      },
-    })
-  );
+  const sensors = useSensors(mouseSensor, touchSensor);
 
   const handleDragStart = (event: DragStartEvent) => {
-    const { active } = event;
-    const type = active.data.current?.type;
-    
-    if (type) {
-      const labelMap: Record<string, string> = {
-        hero: 'Hero Section',
-        features: 'Features',
-        pricing: 'Pricing',
-        testimonials: 'Testimonials',
-        cta: 'Call to Action',
-        footer: 'Footer',
-      };
-
-      setActiveItem({
-        type,
-        label: labelMap[type] || type,
-      });
-    }
+    setActiveId(event.active.id as string);
+    const label = (event.active.id as string).replace('template-', '');
+    setDraggedLabel(label);
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
-    setActiveItem(null);
-    onDragEnd(event);
+    setActiveId(null);
+    setDraggedLabel('');
+    onDragEnd?.(event);
   };
-
-  if (!isMounted) {
-    return <div suppressHydrationWarning>{children}</div>;
-  }
 
   return (
     <DndContext 
@@ -86,9 +56,11 @@ const DndProvider = ({ children, onDragEnd }: DndProviderProps) => {
       onDragEnd={handleDragEnd}
     >
       {children}
-      <DragOverlay dropAnimation={null}>
-        {activeItem && (
-          <DragOverlayContent type={activeItem.type} label={activeItem.label} />
+      <DragOverlay dropAnimation={null} modifiers={[]}>
+        {activeId && (
+          <div className="p-4 bg-white rounded-lg shadow-xl border-2 border-blue-500 cursor-grabbing select-none">
+            {draggedLabel}
+          </div>
         )}
       </DragOverlay>
     </DndContext>

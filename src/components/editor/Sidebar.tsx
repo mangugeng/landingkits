@@ -1,7 +1,6 @@
 'use client';
 
 import { useDraggable } from '@dnd-kit/core';
-import { CSS } from '@dnd-kit/utilities';
 import { BlockType } from '@/store/editor';
 import { useEffect, useState } from 'react';
 import { blockGroups } from '@/constants/blockGroups';
@@ -13,7 +12,7 @@ interface BlockItemProps {
 
 const BlockItem = ({ type, label }: BlockItemProps) => {
   const [isMounted, setIsMounted] = useState(false);
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `template-${type}`,
     data: {
       type,
@@ -25,15 +24,9 @@ const BlockItem = ({ type, label }: BlockItemProps) => {
     setIsMounted(true);
   }, []);
 
-  const style = transform
-    ? {
-        transform: CSS.Translate.toString(transform),
-      }
-    : undefined;
-
   if (!isMounted) {
     return (
-      <div className="p-4 mb-2 bg-white rounded-lg shadow cursor-move hover:shadow-md transition-shadow" suppressHydrationWarning>
+      <div className="p-4 mb-2 bg-white rounded-lg shadow cursor-move hover:shadow-md" suppressHydrationWarning>
         {label}
       </div>
     );
@@ -44,10 +37,11 @@ const BlockItem = ({ type, label }: BlockItemProps) => {
       ref={setNodeRef}
       {...listeners}
       {...attributes}
-      className={`p-4 mb-2 bg-white rounded-lg shadow transition-all ${
-        isDragging ? 'opacity-30 cursor-grabbing' : 'cursor-grab hover:shadow-md'
+      className={`p-4 mb-2 bg-white rounded-lg ${
+        isDragging 
+          ? 'invisible'
+          : 'shadow hover:shadow-md cursor-grab'
       }`}
-      style={style}
     >
       {label}
     </div>
@@ -70,11 +64,11 @@ const Sidebar = () => {
   };
 
   return (
-    <div className="w-64 bg-gray-50 p-4 border-r border-gray-200 h-screen overflow-y-auto">
+    <div className="w-64 bg-gray-50 p-4 border-r border-gray-200 h-screen overflow-y-auto relative">
       <h2 className="text-lg font-semibold mb-4">Komponen</h2>
-      <div className="space-y-4">
+      <div className="space-y-4 relative">
         {blockGroups.map((group) => (
-          <div key={group.id} className="space-y-2">
+          <div key={group.id} className="space-y-2 relative">
             <button
               onClick={() => toggleGroup(group.id)}
               className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-900 hover:text-gray-600"

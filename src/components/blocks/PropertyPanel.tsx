@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { useEditorStore, Block } from '@/store/editor';
 
 interface PropertyConfig {
@@ -144,7 +143,7 @@ const blockProperties: Record<Block['type'], PropertyConfig[]> = {
   ],
 };
 
-const PropertyPanel: React.FC = () => {
+const PropertyPanel = () => {
   const selectedBlockId = useEditorStore((state) => state.selectedBlockId);
   const blocks = useEditorStore((state) => state.blocks);
   const updateBlock = useEditorStore((state) => state.updateBlock);
@@ -248,4 +247,4 @@ const PropertyPanel: React.FC = () => {
   );
 };
 
-export default PropertyPanel;
+export default PropertyPanel; 
