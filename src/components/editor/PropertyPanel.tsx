@@ -197,11 +197,11 @@ const PropertyPanel: React.FC = () => {
             </label>
             {prop.type === 'select' && prop.options ? (
               <select
-                value={selectedBlock.props[prop.key] || ''}
+                value={String(selectedBlock.props[prop.key] || '')}
                 onChange={(e) => handlePropertyChange(prop.key, e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="">Pilih {prop.label}</option>
+                <option value="">Select an option</option>
                 {prop.options.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
@@ -209,36 +209,19 @@ const PropertyPanel: React.FC = () => {
                 ))}
               </select>
             ) : prop.type === 'color' ? (
-              <div className="flex gap-2">
-                <input
-                  type="color"
-                  value={selectedBlock.props[prop.key] || '#ffffff'}
-                  onChange={(e) => handlePropertyChange(prop.key, e.target.value)}
-                  className="h-10 w-10"
-                />
-                <input
-                  type="text"
-                  value={selectedBlock.props[prop.key] || ''}
-                  onChange={(e) => handlePropertyChange(prop.key, e.target.value)}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="#000000"
-                />
-              </div>
-            ) : prop.type === 'richtext' ? (
-              <textarea
-                value={selectedBlock.props[prop.key] || ''}
+              <input
+                type="color"
+                value={String(selectedBlock.props[prop.key] || '#000000')}
                 onChange={(e) => handlePropertyChange(prop.key, e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                rows={4}
-                placeholder={`Masukkan ${prop.label.toLowerCase()}`}
+                className="w-full h-10 p-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               />
             ) : (
               <input
-                type="text"
-                value={selectedBlock.props[prop.key] || ''}
+                type={prop.type === 'richtext' ? 'text' : prop.type}
+                value={String(selectedBlock.props[prop.key] || '')}
                 onChange={(e) => handlePropertyChange(prop.key, e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                placeholder={`Masukkan ${prop.label.toLowerCase()}`}
+                placeholder={`Enter ${prop.label.toLowerCase()}`}
               />
             )}
           </div>
