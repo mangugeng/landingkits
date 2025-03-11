@@ -1,97 +1,76 @@
+'use client';
+
 import Image from 'next/image';
 
 interface Testimonial {
-  content: string;
-  author: {
-    name: string;
-    role: string;
-    company: string;
-    image: string;
-  };
+  name: string;
+  text: string;
+  role: string;
+  company: string;
+  imageUrl: string;
 }
 
 interface TestimonialsProps {
-  sectionTitle?: string;
-  testimonials?: Testimonial[];
+  title?: string;
+  testimonials?: string;
   layout?: 'grid' | 'carousel';
 }
 
-const defaultTestimonials: Testimonial[] = [
-  {
-    content: "This platform has transformed how we build landing pages. It&apos;s intuitive, fast, and the results are professional.",
-    author: {
-      name: 'Sarah Johnson',
-      role: 'Marketing Director',
-      company: 'TechCorp',
-      image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-    },
-  },
-  {
-    content: "We&apos;ve seen a 50% increase in conversion rates since using this tool. The customization options are exactly what we needed.",
-    author: {
-      name: 'Michael Chen',
-      role: 'CEO',
-      company: 'GrowthStart',
-      image: 'https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-    },
-  },
-];
-
 const Testimonials = ({
-  sectionTitle = 'What Our Customers Say',
-  testimonials = defaultTestimonials,
+  title = 'Testimoni Pelanggan',
+  testimonials = '[]',
   layout = 'grid',
 }: TestimonialsProps) => {
+  let parsedTestimonials: Testimonial[] = [];
+  
+  try {
+    parsedTestimonials = JSON.parse(testimonials);
+    if (!Array.isArray(parsedTestimonials)) {
+      parsedTestimonials = [];
+    }
+  } catch (error) {
+    console.error('Error parsing testimonials:', error);
+  }
+
   return (
-    <div className="bg-white py-12 sm:py-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center">
-          <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
-            {sectionTitle}
+    <div className="bg-white py-24 sm:py-32">
+      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+            {title}
           </h2>
         </div>
-        <div className={`mt-12 ${
-          layout === 'grid'
-            ? 'grid grid-cols-1 gap-8 lg:grid-cols-2'
-            : 'space-y-8'
-        }`}>
-          {testimonials.map((testimonial, index) => (
+        <div className={`mx-auto mt-16 ${layout === 'grid' ? 'grid gap-8 sm:grid-cols-2 lg:grid-cols-3' : 'space-y-8'}`}>
+          {parsedTestimonials.map((testimonial) => (
             <div
-              key={index}
-              className="relative bg-white p-8 border border-gray-200 rounded-lg"
+              key={testimonial.name}
+              className="relative bg-white p-6 shadow-sm ring-1 ring-gray-900/5 rounded-lg"
             >
-              <div className="relative">
-                <svg
-                  className="absolute -top-2 -left-2 h-8 w-8 text-gray-200 transform -translate-x-2 -translate-y-2"
-                  fill="currentColor"
-                  viewBox="0 0 32 32"
-                  aria-hidden="true"
-                >
-                  <path d="M9.352 4C4.456 7.456 1 13.12 1 19.36c0 5.088 3.072 8.064 6.624 8.064 3.36 0 5.856-2.688 5.856-5.856 0-3.168-2.208-5.472-5.088-5.472-.576 0-1.344.096-1.536.192.48-3.264 3.552-7.104 6.624-9.024L9.352 4zm16.512 0c-4.8 3.456-8.256 9.12-8.256 15.36 0 5.088 3.072 8.064 6.624 8.064 3.264 0 5.856-2.688 5.856-5.856 0-3.168-2.304-5.472-5.184-5.472-.576 0-1.248.096-1.44.192.48-3.264 3.456-7.104 6.528-9.024L25.864 4z" />
-                </svg>
-                <p className="relative text-lg text-gray-600">
-                  {testimonial.content}
-                </p>
-              </div>
-              <div className="mt-6 flex items-center">
-                <div className="flex-shrink-0">
+              <div className="flex items-center gap-x-4 mb-4">
+                <div className="relative h-12 w-12 rounded-full overflow-hidden">
                   <Image
-                    className="h-10 w-10 rounded-full"
-                    src={testimonial.author.image}
-                    alt={testimonial.author.name}
-                    width={40}
-                    height={40}
+                    src={testimonial.imageUrl}
+                    alt={testimonial.name}
+                    fill
+                    className="object-cover"
                   />
                 </div>
-                <div className="ml-3">
-                  <p className="text-sm font-medium text-gray-900">
-                    {testimonial.author.name}
+                <div>
+                  <h3 className="text-base font-semibold leading-7 tracking-tight text-gray-900">
+                    {testimonial.name}
+                  </h3>
+                  <p className="text-sm font-semibold leading-6 text-blue-600">
+                    {testimonial.role} di {testimonial.company}
                   </p>
-                  <div className="text-sm text-gray-500">
-                    {testimonial.author.role} at {testimonial.author.company}
-                  </div>
                 </div>
               </div>
+              <p className="text-gray-600 text-sm leading-6">{testimonial.text}</p>
+              <svg
+                className="absolute top-6 right-6 h-8 w-8 fill-slate-200"
+                viewBox="0 0 24 24"
+              >
+                <path d="M4.583 17.321C3.553 16.227 3 15 3 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179zm10 0C13.553 16.227 13 15 13 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179z" />
+              </svg>
             </div>
           ))}
         </div>

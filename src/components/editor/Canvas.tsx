@@ -1,62 +1,90 @@
 'use client';
 
 import { useDroppable } from '@dnd-kit/core';
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useEditorStore } from '@/store/editor';
 import BlockRenderer from './BlockRenderer';
 
 const Canvas = () => {
   const blocks = useEditorStore((state) => state.blocks);
-  const { setNodeRef, isOver } = useDroppable({
+  const previewMode = useEditorStore((state) => state.previewMode);
+
+  const { setNodeRef, isOver, active } = useDroppable({
     id: 'canvas',
   });
 
+  const isTemplateOver = isOver && active?.data?.current?.isTemplate;
+
   return (
-    <div className="flex-1 bg-gray-100 p-8 h-screen overflow-y-auto">
-      <div
-        ref={setNodeRef}
-        className={`relative max-w-5xl mx-auto min-h-[calc(100vh-4rem)] bg-white rounded-lg shadow-sm p-8 transition-transform duration-200 ${
-          isOver ? 'ring-2 ring-blue-500 ring-opacity-50 shadow-lg' : ''
-        }`}
-        style={{
-          transform: isOver ? 'scale(1.005)' : 'none',
-          transition: 'transform 0.2s ease-in-out',
-        }}
+    <div 
+      ref={setNodeRef}
+      id="canvas" 
+      className={`flex-1 bg-gray-50 overflow-y-auto ${previewMode ? 'p-0' : 'p-8'}`}
+    >
+      <div 
+        className={`
+          mx-auto transition-colors duration-200 ease-in-out
+          ${previewMode 
+            ? 'w-full' 
+            : `max-w-6xl bg-white shadow-sm border ${isTemplateOver ? 'border-blue-500 border-2' : 'border-gray-200'} min-h-[calc(100vh-8rem)]`
+          }
+        `}
       >
-        {blocks.length === 0 ? (
-          <div className={`h-full flex items-center justify-center text-gray-400 border-2 border-dashed border-gray-200 rounded-lg transition-colors duration-200 ${
-            isOver ? 'border-blue-500 bg-blue-50 bg-opacity-50' : ''
-          }`}>
-            {isOver ? (
-              <div className="text-center">
-                <div className="text-blue-500 font-medium text-lg mb-2">
-                  Lepaskan untuk menambahkan komponen
-                </div>
-                <div className="text-blue-400 text-sm">
-                  Komponen akan ditambahkan di sini
-                </div>
-              </div>
+        {blocks.length === 0 && !previewMode && (
+          <div className={`
+            flex flex-col items-center justify-center h-[calc(100vh-8rem)] 
+            ${isTemplateOver ? 'bg-blue-50' : 'text-gray-400'}
+            transition-colors duration-200 ease-in-out
+          `}>
+            {isTemplateOver ? (
+              <>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-12 w-12 mb-4 text-blue-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1}
+                    d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h10a2 2 0 012 2v14a2 2 0 01-2 2z"
+                  />
+                </svg>
+                <p className="text-lg font-medium text-blue-700">Lepaskan untuk menambahkan blok</p>
+              </>
             ) : (
-              <div className="text-center">
-                <div className="text-gray-500 font-medium text-lg mb-2">
-                  Area Konten
-                </div>
-                <div className="text-gray-400 text-sm">
-                  Drag and drop komponen dari sidebar ke sini
-                </div>
-              </div>
+              <>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-12 w-12 mb-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1}
+                    d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h10a2 2 0 012 2v14a2 2 0 01-2 2z"
+                  />
+                </svg>
+                <p className="text-lg font-medium">Seret blok dari sidebar ke sini</p>
+                <p className="text-sm mt-2">
+                  Mulai dengan menambahkan blok untuk membuat landing page Anda
+                </p>
+              </>
             )}
           </div>
-        ) : (
-          <SortableContext items={blocks.map((block) => block.id)} strategy={verticalListSortingStrategy}>
-            {blocks.map((block) => (
-              <BlockRenderer key={block.id} block={block} />
-            ))}
-            {isOver && (
-              <div className="absolute inset-0 border-2 border-blue-500 border-dashed rounded-lg pointer-events-none" />
-            )}
-          </SortableContext>
         )}
+
+        {blocks.map((block) => (
+          <BlockRenderer 
+            key={block.id} 
+            block={block} 
+            isPreview={previewMode}
+          />
+        ))}
       </div>
     </div>
   );

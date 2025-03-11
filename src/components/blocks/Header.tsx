@@ -5,11 +5,27 @@ import { useEffect, useRef } from 'react';
 interface HeaderProps {
   title?: string;
   subtitle?: string;
+  ctaText?: string;
+  ctaLink?: string;
+  secondaryCtaText?: string;
+  secondaryCtaLink?: string;
+  backgroundColor?: string;
+  textColor?: string;
+  gradientFrom?: string;
+  gradientTo?: string;
 }
 
 const Header = ({
   title = 'Transform your business with our solutions',
   subtitle = 'We help companies of all sizes accelerate their growth with innovative technology solutions.',
+  ctaText = 'Get started',
+  ctaLink = '#',
+  secondaryCtaText = 'Learn more',
+  secondaryCtaLink = '#',
+  backgroundColor = 'bg-white',
+  textColor = 'text-gray-900',
+  gradientFrom = 'from-blue-100/20',
+  gradientTo = 'to-white',
 }: HeaderProps) => {
   const headerRef = useRef<HTMLDivElement>(null);
 
@@ -39,7 +55,7 @@ const Header = ({
   }, []);
 
   return (
-    <div className="relative isolate overflow-hidden bg-gradient-to-b from-blue-100/20">
+    <div className={`relative isolate ${backgroundColor} bg-gradient-to-b ${gradientFrom} ${gradientTo}`}>
       <div
         className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80"
         aria-hidden="true"
@@ -57,22 +73,22 @@ const Header = ({
         className="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8 opacity-0 transition-opacity duration-1000"
       >
         <div className="mx-auto max-w-2xl lg:mx-0 lg:max-w-3xl">
-          <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
+          <h1 className={`text-4xl font-bold tracking-tight ${textColor} sm:text-6xl`}>
             {title}
           </h1>
           <p className="mt-6 text-lg leading-8 text-gray-600">{subtitle}</p>
           <div className="mt-10 flex items-center gap-x-6">
             <a
-              href="#"
+              href={ctaLink}
               className="rounded-md bg-blue-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
             >
-              Get started
+              {ctaText}
             </a>
             <a
-              href="#"
+              href={secondaryCtaLink}
               className="text-sm font-semibold leading-6 text-gray-900"
             >
-              Learn more <span aria-hidden="true">→</span>
+              {secondaryCtaText} <span aria-hidden="true">→</span>
             </a>
           </div>
         </div>

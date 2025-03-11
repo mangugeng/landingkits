@@ -5,7 +5,7 @@ import Image from 'next/image';
 interface TeamMember {
   name: string;
   role: string;
-  image: string;
+  imageUrl: string;
   bio?: string;
   social?: {
     twitter?: string;
@@ -15,9 +15,9 @@ interface TeamMember {
 }
 
 interface TeamProps {
-  sectionTitle?: string;
-  sectionDescription?: string;
-  members?: TeamMember[];
+  title?: string;
+  description?: string;
+  members?: string;
   layout?: 'grid' | 'list';
   showBio?: boolean;
 }
@@ -26,7 +26,7 @@ const defaultMembers: TeamMember[] = [
   {
     name: 'John Smith',
     role: 'CEO & Founder',
-    image: '/team/member1.jpg',
+    imageUrl: '/team/member1.jpg',
     bio: 'John has over 15 years of experience in software development and product management.',
     social: {
       twitter: 'https://twitter.com/johnsmith',
@@ -37,7 +37,7 @@ const defaultMembers: TeamMember[] = [
   {
     name: 'Sarah Johnson',
     role: 'CTO',
-    image: '/team/member2.jpg',
+    imageUrl: '/team/member2.jpg',
     bio: 'Sarah leads our technical team and has a strong background in cloud architecture.',
     social: {
       twitter: 'https://twitter.com/sarahjohnson',
@@ -48,7 +48,7 @@ const defaultMembers: TeamMember[] = [
   {
     name: 'Michael Chen',
     role: 'Head of Design',
-    image: '/team/member3.jpg',
+    imageUrl: '/team/member3.jpg',
     bio: 'Michael brings creativity and user-centered design principles to our products.',
     social: {
       twitter: 'https://twitter.com/michaelchen',
@@ -58,7 +58,7 @@ const defaultMembers: TeamMember[] = [
   {
     name: 'Emily Davis',
     role: 'Head of Marketing',
-    image: '/team/member4.jpg',
+    imageUrl: '/team/member4.jpg',
     bio: 'Emily drives our marketing strategy and brand development initiatives.',
     social: {
       twitter: 'https://twitter.com/emilydavis',
@@ -68,22 +68,37 @@ const defaultMembers: TeamMember[] = [
 ];
 
 const Team = ({
-  sectionTitle = 'Meet Our Team',
-  sectionDescription = 'We are a group of passionate individuals dedicated to creating amazing products.',
-  members = defaultMembers,
+  title = 'Tim Kami',
+  description = 'Kenali tim hebat di belakang layar',
+  members = JSON.stringify([]),
   layout = 'grid',
   showBio = true,
 }: TeamProps) => {
+  let parsedMembers: TeamMember[] = [];
+
+  try {
+    const parsed = JSON.parse(members);
+    if (Array.isArray(parsed)) {
+      parsedMembers = parsed.map(member => ({
+        ...member,
+        imageUrl: member.imageUrl || member.image
+      }));
+    }
+  } catch (error) {
+    console.error('Error parsing members:', error);
+    parsedMembers = [];
+  }
+
   return (
     <div className="bg-white py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-            {sectionTitle}
+            {title}
           </h2>
-          {sectionDescription && (
+          {description && (
             <p className="mt-4 text-lg leading-8 text-gray-600">
-              {sectionDescription}
+              {description}
             </p>
           )}
         </div>
@@ -94,11 +109,11 @@ const Team = ({
               : 'lg:grid-cols-3 xl:grid-cols-4'
           }`}
         >
-          {members.map((member) => (
+          {parsedMembers.map((member) => (
             <li key={member.name}>
               <div className="flex flex-col items-center">
                 <Image
-                  src={member.image}
+                  src={member.imageUrl}
                   alt={member.name}
                   width={224}
                   height={224}

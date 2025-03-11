@@ -2,85 +2,109 @@
 
 import Image from 'next/image';
 
-interface LogosProps {
-  sectionTitle?: string;
-  sectionDescription?: string;
-  logos?: Array<{
-    name: string;
-    url: string;
-    image: string;
-  }>;
+interface Logo {
+  name: string;
+  url: string;
+  image: string;
 }
 
-const defaultLogos = [
+interface LogosProps {
+  title?: string;
+  description?: string;
+  logos?: string;
+}
+
+const defaultLogos: Logo[] = [
   {
-    name: 'Company 1',
-    url: '#',
-    image: '/logos/logo1.svg',
+    name: 'Google',
+    url: 'https://google.com',
+    image: '/images/logos/google.png',
   },
   {
-    name: 'Company 2',
-    url: '#',
-    image: '/logos/logo2.svg',
+    name: 'Microsoft',
+    url: 'https://microsoft.com',
+    image: '/images/logos/microsoft.png',
   },
   {
-    name: 'Company 3',
-    url: '#',
-    image: '/logos/logo3.svg',
+    name: 'Amazon',
+    url: 'https://amazon.com',
+    image: '/images/logos/amazon.png',
   },
   {
-    name: 'Company 4',
-    url: '#',
-    image: '/logos/logo4.svg',
+    name: 'Apple',
+    url: 'https://apple.com',
+    image: '/images/logos/apple.png',
   },
   {
-    name: 'Company 5',
-    url: '#',
-    image: '/logos/logo5.svg',
+    name: 'Meta',
+    url: 'https://meta.com',
+    image: '/images/logos/meta.png',
   },
   {
-    name: 'Company 6',
-    url: '#',
-    image: '/logos/logo6.svg',
+    name: 'Netflix',
+    url: 'https://netflix.com',
+    image: '/images/logos/netflix.png',
   },
 ];
 
+const generatePlaceholderImage = (name: string, index: number) => {
+  const colors = ['2196F3', '00A4EF', 'FF9900', '000000', '1877F2', 'E50914'];
+  const colorIndex = index % colors.length;
+  return `/images/logos/placeholder-${(index % 6) + 1}.png`;
+};
+
 const Logos = ({
-  sectionTitle = 'Trusted by Leading Companies',
-  sectionDescription = 'We work with some of the most innovative companies in the world',
-  logos = defaultLogos,
+  title = 'Dipercaya oleh Perusahaan Terkemuka',
+  description = 'Kami bekerja sama dengan beberapa perusahaan paling inovatif di dunia',
+  logos = JSON.stringify(defaultLogos),
 }: LogosProps) => {
+  let parsedLogos: Logo[] = [];
+
+  try {
+    const parsed = JSON.parse(logos);
+    if (Array.isArray(parsed)) {
+      parsedLogos = parsed.map((logo, index) => {
+        const name = logo.name || `Company ${index + 1}`;
+        return {
+          ...logo,
+          name,
+          url: logo.url || '#',
+          image: logo.image || `/images/logos/logo-${index + 1}.png`
+        };
+      });
+    }
+  } catch (error) {
+    console.error('Error parsing logos:', error);
+    parsedLogos = defaultLogos;
+  }
+
   return (
     <div className="bg-white py-16">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        {(sectionTitle || sectionDescription) && (
+        {(title || description) && (
           <div className="mx-auto max-w-2xl text-center mb-12">
-            {sectionTitle && (
+            {title && (
               <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-                {sectionTitle}
+                {title}
               </h2>
             )}
-            {sectionDescription && (
+            {description && (
               <p className="mt-4 text-lg leading-8 text-gray-600">
-                {sectionDescription}
+                {description}
               </p>
             )}
           </div>
         )}
         <div className="mx-auto grid max-w-lg grid-cols-2 items-center gap-x-8 gap-y-12 sm:max-w-xl sm:grid-cols-3 sm:gap-x-10 sm:gap-y-14 lg:mx-0 lg:max-w-none lg:grid-cols-6">
-          {logos.map((logo, index) => (
+          {parsedLogos.map((logo, index) => (
             <a
               key={index}
               href={logo.url}
               className="flex items-center justify-center grayscale hover:grayscale-0 transition-all duration-200"
             >
-              <Image
-                src={logo.image}
-                alt={logo.name}
-                width={158}
-                height={48}
-                className="max-h-12 w-full object-contain"
-              />
+              <div className="w-full h-12 flex items-center justify-center bg-gray-100 rounded-lg">
+                <span className="text-lg font-semibold text-gray-900">{logo.name}</span>
+              </div>
             </a>
           ))}
         </div>

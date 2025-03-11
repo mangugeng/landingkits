@@ -10,8 +10,10 @@ import {
   DragEndEvent,
   DragOverlay,
   DragStartEvent,
+  defaultDropAnimationSideEffects,
 } from '@dnd-kit/core';
 import { useState } from 'react';
+import { useEditorStore } from '@/store/editor';
 
 interface Props {
   children: ReactNode;
@@ -20,7 +22,8 @@ interface Props {
 
 const DndProvider = ({ children, onDragEnd }: Props) => {
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [draggedLabel, setDraggedLabel] = useState<string>('');
+  const [draggedType, setDraggedType] = useState<string | null>(null);
+  const previewMode = useEditorStore((state) => state.previewMode);
 
   const mouseSensor = useSensor(MouseSensor, {
     activationConstraint: {
@@ -39,15 +42,20 @@ const DndProvider = ({ children, onDragEnd }: Props) => {
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
-    const label = (event.active.id as string).replace('template-', '');
-    setDraggedLabel(label);
+    if (event.active.data.current?.isTemplate) {
+      setDraggedType(event.active.data.current.type);
+    }
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
     setActiveId(null);
-    setDraggedLabel('');
+    setDraggedType(null);
     onDragEnd?.(event);
   };
+
+  if (previewMode) {
+    return <>{children}</>;
+  }
 
   return (
     <DndContext 
@@ -56,10 +64,24 @@ const DndProvider = ({ children, onDragEnd }: Props) => {
       onDragEnd={handleDragEnd}
     >
       {children}
-      <DragOverlay dropAnimation={null} modifiers={[]}>
-        {activeId && (
-          <div className="p-4 bg-white rounded-lg shadow-xl border-2 border-blue-500 cursor-grabbing select-none">
-            {draggedLabel}
+      <DragOverlay
+        dropAnimation={{
+          duration: 150,
+          sideEffects: defaultDropAnimationSideEffects({
+            styles: {
+              active: {
+                opacity: '0.4',
+              },
+            },
+          }),
+        }}
+        modifiers={[]}
+      >
+        {activeId && draggedType && (
+          <div className="p-3 bg-white rounded-lg shadow-lg border-2 border-blue-500 w-64 pointer-events-none">
+            <div className="text-sm font-medium text-gray-700">
+              {draggedType.charAt(0).toUpperCase() + draggedType.slice(1)}
+            </div>
           </div>
         )}
       </DragOverlay>

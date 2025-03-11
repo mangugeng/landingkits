@@ -7,11 +7,13 @@ import Canvas from '@/components/editor/Canvas';
 import PropertyPanel from '@/components/editor/PropertyPanel';
 import Toolbar from '@/components/editor/Toolbar';
 import DndProvider from '@/components/editor/DndProvider';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 
 export default function EditorPage() {
   const addBlock = useEditorStore((state) => state.addBlock);
   const reorderBlocks = useEditorStore((state) => state.reorderBlocks);
   const blocks = useEditorStore((state) => state.blocks);
+  const previewMode = useEditorStore((state) => state.previewMode);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -40,9 +42,14 @@ export default function EditorPage() {
     <DndProvider onDragEnd={handleDragEnd}>
       <Toolbar />
       <div className="flex h-screen pt-14">
-        <Sidebar />
-        <Canvas />
-        <PropertyPanel />
+        {!previewMode && <Sidebar />}
+        <SortableContext 
+          items={blocks.map(block => block.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          <Canvas />
+        </SortableContext>
+        {!previewMode && <PropertyPanel />}
       </div>
     </DndProvider>
   );

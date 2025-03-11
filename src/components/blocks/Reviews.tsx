@@ -18,7 +18,7 @@ interface ReviewsProps {
   sectionTitle?: string;
   sectionDescription?: string;
   layout?: 'grid' | 'carousel';
-  reviews?: Review[];
+  reviews?: string;
 }
 
 const defaultReviews: Review[] = [
@@ -69,22 +69,39 @@ const defaultReviews: Review[] = [
 ];
 
 const Reviews = ({
-  sectionTitle = 'What Our Customers Say',
-  sectionDescription = 'Hear from our satisfied customers about their experience with our platform',
+  sectionTitle = 'Testimoni Pelanggan',
+  sectionDescription = 'Dengarkan pengalaman pelanggan kami yang puas dengan layanan kami',
   layout = 'grid',
-  reviews = defaultReviews,
+  reviews = '[]',
 }: ReviewsProps) => {
   const [activeIndex, setActiveIndex] = useState(0);
+  let parsedReviews: Review[] = [];
+
+  try {
+    const parsed = JSON.parse(reviews);
+    if (Array.isArray(parsed)) {
+      parsedReviews = parsed.map(review => ({
+        ...review,
+        author: {
+          ...review.author,
+          image: review.author?.image || 'https://ui-avatars.com/api/?name=User&background=random'
+        }
+      }));
+    }
+  } catch (error) {
+    console.error('Error parsing reviews:', error);
+    parsedReviews = [];
+  }
 
   const nextSlide = () => {
     setActiveIndex((current) =>
-      current === reviews.length - 1 ? 0 : current + 1
+      current === parsedReviews.length - 1 ? 0 : current + 1
     );
   };
 
   const prevSlide = () => {
     setActiveIndex((current) =>
-      current === 0 ? reviews.length - 1 : current - 1
+      current === 0 ? parsedReviews.length - 1 : current - 1
     );
   };
 
@@ -111,7 +128,7 @@ const Reviews = ({
                 }}
               >
                 <div className="flex">
-                  {reviews.map((review) => (
+                  {parsedReviews.map((review) => (
                     <div
                       key={review.id}
                       className="w-full flex-shrink-0 px-4 md:px-8"
@@ -124,8 +141,8 @@ const Reviews = ({
                         </blockquote>
                         <figcaption className="mt-6 flex items-center gap-x-4">
                           <Image
-                            src={review.author.image}
-                            alt={review.author.name}
+                            src={review.author?.image || 'https://ui-avatars.com/api/?name=User&background=random'}
+                            alt={review.author?.name || 'Reviewer'}
                             width={40}
                             height={40}
                             className="h-10 w-10 rounded-full bg-gray-50"
@@ -197,7 +214,7 @@ const Reviews = ({
           )}
         </div>
         <div className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-8 lg:mx-0 lg:max-w-none lg:grid-cols-2">
-          {reviews.map((review) => (
+          {parsedReviews.map((review) => (
             <figure
               key={review.id}
               className="relative isolate rounded-2xl bg-white p-6 shadow-xl shadow-gray-900/10"
@@ -209,8 +226,8 @@ const Reviews = ({
               </blockquote>
               <figcaption className="mt-6 flex items-center gap-x-4">
                 <Image
-                  src={review.author.image}
-                  alt={review.author.name}
+                  src={review.author?.image || 'https://ui-avatars.com/api/?name=User&background=random'}
+                  alt={review.author?.name || 'Reviewer'}
                   width={40}
                   height={40}
                   className="h-10 w-10 rounded-full bg-gray-50"

@@ -2,85 +2,85 @@ import Image from 'next/image';
 
 interface NavItem {
   label: string;
-  href: string;
+  link: string;
 }
 
 interface NavbarProps {
   logo?: string;
-  items?: NavItem[];
+  logoAlt?: string;
+  menuItems?: string;
   buttonText?: string;
   buttonLink?: string;
-  transparent?: boolean;
+  isPreview?: boolean;
 }
 
-const defaultItems: NavItem[] = [
-  { label: 'Features', href: '#features' },
-  { label: 'Pricing', href: '#pricing' },
-  { label: 'About', href: '#about' },
-  { label: 'Contact', href: '#contact' },
-];
-
 const Navbar = ({
-  logo = '/logo.svg',
-  items = defaultItems,
-  buttonText = 'Get Started',
+  logo = '/images/logo.svg',
+  logoAlt = 'LandingKits Logo',
+  menuItems = '[]',
+  buttonText = 'Mulai Sekarang',
   buttonLink = '#',
-  transparent = false,
+  isPreview = false,
 }: NavbarProps) => {
+  let items: NavItem[] = [];
+
+  try {
+    items = JSON.parse(menuItems);
+    if (!Array.isArray(items)) {
+      items = [];
+    }
+  } catch (error) {
+    console.error('Error parsing menuItems:', error);
+  }
+
+  // Jika bukan mode preview, render navbar dengan posisi relative
+  const navClassName = isPreview 
+    ? "bg-white fixed w-full z-50 top-0 left-0 border-b border-gray-200" 
+    : "bg-white w-full border-b border-gray-200";
+
   return (
-    <nav className={`${
-      transparent ? 'bg-transparent' : 'bg-white'
-    } fixed w-full z-50 transition-colors duration-300`}>
+    <nav className={navClassName}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex">
-            <div className="flex-shrink-0 flex items-center">
-              <Image
-                className="h-8 w-auto"
-                src={logo}
-                alt="Logo"
-                width={32}
-                height={32}
-              />
-            </div>
-            <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-              {items.map((item) => (
-                <a
-                  key={item.href}
-                  href={item.href}
-                  className={`inline-flex items-center px-1 pt-1 text-sm font-medium ${
-                    transparent
-                      ? 'text-white hover:text-gray-200'
-                      : 'text-gray-900 hover:text-gray-700'
-                  }`}
-                >
-                  {item.label}
-                </a>
-              ))}
-            </div>
+        <div className="flex justify-between items-center h-16">
+          {/* Logo */}
+          <div className="flex-shrink-0 flex items-center">
+            <Image
+              src={logo}
+              alt={logoAlt}
+              width={150}
+              height={32}
+              className="h-8 w-auto text-blue-600"
+              priority
+            />
           </div>
-          <div className="hidden sm:ml-6 sm:flex sm:items-center">
+
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex md:items-center md:space-x-8">
+            {items.map((item) => (
+              <a
+                key={item.link}
+                href={item.link}
+                className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium"
+              >
+                {item.label}
+              </a>
+            ))}
             <a
               href={buttonLink}
-              className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md ${
-                transparent
-                  ? 'text-white bg-white/20 hover:bg-white/30'
-                  : 'text-white bg-blue-600 hover:bg-blue-700'
-              } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
+              className="ml-8 inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
               {buttonText}
             </a>
           </div>
-          <div className="flex items-center sm:hidden">
+
+          {/* Mobile menu button */}
+          <div className="md:hidden flex items-center">
             <button
               type="button"
-              className={`inline-flex items-center justify-center p-2 rounded-md ${
-                transparent ? 'text-white' : 'text-gray-400'
-              } hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500`}
-              aria-controls="mobile-menu"
+              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
               aria-expanded="false"
             >
-              <span className="sr-only">Open main menu</span>
+              <span className="sr-only">Buka menu utama</span>
               <svg
                 className="block h-6 w-6"
                 xmlns="http://www.w3.org/2000/svg"
@@ -100,33 +100,25 @@ const Navbar = ({
           </div>
         </div>
       </div>
-      <div className="sm:hidden" id="mobile-menu">
-        <div className="pt-2 pb-3 space-y-1">
+
+      {/* Mobile menu panel */}
+      <div className="hidden md:hidden">
+        <div className="px-2 pt-2 pb-3 space-y-1">
           {items.map((item) => (
             <a
-              key={item.href}
-              href={item.href}
-              className={`block pl-3 pr-4 py-2 text-base font-medium ${
-                transparent
-                  ? 'text-white hover:text-gray-200'
-                  : 'text-gray-900 hover:text-gray-700'
-              }`}
+              key={item.link}
+              href={item.link}
+              className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
             >
               {item.label}
             </a>
           ))}
-          <div className="mt-4 px-3">
-            <a
-              href={buttonLink}
-              className={`block text-center px-4 py-2 border border-transparent text-base font-medium rounded-md ${
-                transparent
-                  ? 'text-white bg-white/20 hover:bg-white/30'
-                  : 'text-white bg-blue-600 hover:bg-blue-700'
-              } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
-            >
-              {buttonText}
-            </a>
-          </div>
+          <a
+            href={buttonLink}
+            className="block w-full px-5 py-3 text-center font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md"
+          >
+            {buttonText}
+          </a>
         </div>
       </div>
     </nav>

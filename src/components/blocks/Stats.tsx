@@ -9,9 +9,9 @@ interface Stat {
 }
 
 interface StatsProps {
-  sectionTitle?: string;
-  sectionDescription?: string;
-  stats?: Stat[];
+  title?: string;
+  description?: string;
+  stats?: string;
   layout?: 'grid' | 'row';
   background?: 'white' | 'gray' | 'blue';
 }
@@ -111,12 +111,23 @@ const AnimatedValue = ({ value }: { value: string }) => {
 };
 
 const Stats = ({
-  sectionTitle = 'Trusted by companies worldwide',
-  sectionDescription = 'We\'ve helped thousands of organizations achieve their goals',
-  stats = defaultStats,
+  title = 'Statistik Kami',
+  description = 'Pencapaian kami dalam angka',
+  stats = '[]',
   layout = 'grid',
   background = 'white',
 }: StatsProps) => {
+  let parsedStats: Stat[] = [];
+
+  try {
+    parsedStats = JSON.parse(stats);
+    if (!Array.isArray(parsedStats)) {
+      parsedStats = [];
+    }
+  } catch (error) {
+    console.error('Error parsing stats:', error);
+  }
+
   const getBackgroundColor = () => {
     switch (background) {
       case 'gray':
@@ -133,11 +144,11 @@ const Stats = ({
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-            {sectionTitle}
+            {title}
           </h2>
-          {sectionDescription && (
+          {description && (
             <p className="mt-4 text-lg leading-8 text-gray-600">
-              {sectionDescription}
+              {description}
             </p>
           )}
         </div>
@@ -148,7 +159,7 @@ const Stats = ({
               : 'lg:max-w-none lg:grid-cols-1'
           }`}
         >
-          {stats.map((stat) => (
+          {parsedStats.map((stat) => (
             <div
               key={stat.label}
               className={`flex flex-col ${

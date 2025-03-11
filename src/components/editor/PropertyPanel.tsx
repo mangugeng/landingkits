@@ -14,9 +14,37 @@ const blockProperties: Record<Block['type'], PropertyConfig[]> = {
   hero: [
     { type: 'text', label: 'Judul', key: 'title' },
     { type: 'text', label: 'Subtitle', key: 'subtitle' },
-    { type: 'text', label: 'Teks Button', key: 'buttonText' },
-    { type: 'text', label: 'Link Button', key: 'buttonLink' },
-    { type: 'image', label: 'Background Image', key: 'backgroundImage' },
+    { type: 'text', label: 'Teks CTA', key: 'ctaText' },
+    { type: 'text', label: 'Link CTA', key: 'ctaLink' },
+    { type: 'image', label: 'Gambar Hero', key: 'imageUrl' },
+    { type: 'text', label: 'Alt Text Gambar', key: 'imageAlt' },
+    { type: 'select', label: 'Layout', key: 'layout', options: [
+      { label: 'Kiri', value: 'left' },
+      { label: 'Tengah', value: 'center' },
+    ]},
+    { type: 'select', label: 'Posisi Gambar', key: 'imagePosition', options: [
+      { label: 'Kanan', value: 'right' },
+      { label: 'Kiri', value: 'left' },
+    ]},
+    { type: 'select', label: 'Warna Background', key: 'backgroundColor', options: [
+      { label: 'Putih', value: 'bg-white' },
+      { label: 'Abu-abu', value: 'bg-gray-50' },
+      { label: 'Biru Muda', value: 'bg-blue-50' },
+    ]},
+    { type: 'select', label: 'Warna Teks', key: 'textColor', options: [
+      { label: 'Hitam', value: 'text-gray-900' },
+      { label: 'Putih', value: 'text-white' },
+      { label: 'Biru', value: 'text-blue-900' },
+    ]},
+    { type: 'select', label: 'Warna CTA', key: 'ctaColor', options: [
+      { label: 'Biru', value: 'bg-blue-600' },
+      { label: 'Merah', value: 'bg-red-600' },
+      { label: 'Hijau', value: 'bg-green-600' },
+    ]},
+    { type: 'select', label: 'Tinggi Section', key: 'height', options: [
+      { label: 'Normal', value: 'normal' },
+      { label: 'Besar', value: 'large' },
+    ]},
   ],
   navbar: [
     { type: 'text', label: 'Logo', key: 'logo' },
@@ -28,8 +56,32 @@ const blockProperties: Record<Block['type'], PropertyConfig[]> = {
     ]},
   ],
   header: [
-    { type: 'text', label: 'Title', key: 'title' },
+    { type: 'text', label: 'Judul', key: 'title' },
     { type: 'text', label: 'Subtitle', key: 'subtitle' },
+    { type: 'text', label: 'Teks CTA', key: 'ctaText' },
+    { type: 'text', label: 'Link CTA', key: 'ctaLink' },
+    { type: 'text', label: 'Teks CTA Sekunder', key: 'secondaryCtaText' },
+    { type: 'text', label: 'Link CTA Sekunder', key: 'secondaryCtaLink' },
+    { type: 'select', label: 'Warna Background', key: 'backgroundColor', options: [
+      { label: 'Putih', value: 'bg-white' },
+      { label: 'Abu-abu', value: 'bg-gray-50' },
+      { label: 'Biru Muda', value: 'bg-blue-50' },
+    ]},
+    { type: 'select', label: 'Warna Teks', key: 'textColor', options: [
+      { label: 'Hitam', value: 'text-gray-900' },
+      { label: 'Putih', value: 'text-white' },
+      { label: 'Biru', value: 'text-blue-900' },
+    ]},
+    { type: 'select', label: 'Gradient Dari', key: 'gradientFrom', options: [
+      { label: 'Biru Muda', value: 'from-blue-100/20' },
+      { label: 'Merah Muda', value: 'from-red-100/20' },
+      { label: 'Hijau Muda', value: 'from-green-100/20' },
+    ]},
+    { type: 'select', label: 'Gradient Ke', key: 'gradientTo', options: [
+      { label: 'Putih', value: 'to-white' },
+      { label: 'Abu-abu', value: 'to-gray-50' },
+      { label: 'Transparan', value: 'to-transparent' },
+    ]},
   ],
   features: [
     { type: 'text', label: 'Section Title', key: 'sectionTitle' },
@@ -147,7 +199,7 @@ const blockProperties: Record<Block['type'], PropertyConfig[]> = {
 const PropertyPanel: React.FC = () => {
   const selectedBlockId = useEditorStore((state) => state.selectedBlockId);
   const blocks = useEditorStore((state) => state.blocks);
-  const updateBlock = useEditorStore((state) => state.updateBlock);
+  const updateBlockProps = useEditorStore((state) => state.updateBlockProps);
   const removeBlock = useEditorStore((state) => state.removeBlock);
 
   const selectedBlock = blocks.find((block) => block.id === selectedBlockId);
@@ -163,7 +215,7 @@ const PropertyPanel: React.FC = () => {
   const properties = blockProperties[selectedBlock.type] || [];
 
   const handlePropertyChange = (key: string, value: string) => {
-    updateBlock(selectedBlock.id, { [key]: value });
+    updateBlockProps(selectedBlock.id, { [key]: value });
   };
 
   return (
@@ -201,7 +253,7 @@ const PropertyPanel: React.FC = () => {
                 onChange={(e) => handlePropertyChange(prop.key, e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="">Select an option</option>
+                <option value="">Pilih opsi</option>
                 {prop.options.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
@@ -221,7 +273,7 @@ const PropertyPanel: React.FC = () => {
                 value={String(selectedBlock.props[prop.key] || '')}
                 onChange={(e) => handlePropertyChange(prop.key, e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                placeholder={`Enter ${prop.label.toLowerCase()}`}
+                placeholder={`Masukkan ${prop.label.toLowerCase()}`}
               />
             )}
           </div>
