@@ -146,7 +146,7 @@ const blockProperties: Record<Block['type'], PropertyConfig[]> = {
 const PropertyPanel = () => {
   const selectedBlockId = useEditorStore((state) => state.selectedBlockId);
   const blocks = useEditorStore((state) => state.blocks);
-  const updateBlock = useEditorStore((state) => state.updateBlock);
+  const updateBlockProps = useEditorStore((state) => state.updateBlockProps);
   const removeBlock = useEditorStore((state) => state.removeBlock);
 
   const selectedBlock = blocks.find((block) => block.id === selectedBlockId);
@@ -162,7 +162,7 @@ const PropertyPanel = () => {
   const properties = blockProperties[selectedBlock.type] || [];
 
   const handlePropertyChange = (key: string, value: string) => {
-    updateBlock(selectedBlock.id, { [key]: value });
+    updateBlockProps(selectedBlock.id, { [key]: value });
   };
 
   return (

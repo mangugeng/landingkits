@@ -5,6 +5,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useEditorStore, Block } from '@/store/editor';
 import dynamic from 'next/dynamic';
+import type { CSSProperties } from 'react';
 
 // Dynamically import block components
 const Hero = dynamic(() => import('@/components/blocks/Hero'));
@@ -49,12 +50,12 @@ const BlockRenderer = ({ block, isPreview = false }: BlockRendererProps) => {
     disabled: previewMode || isPreview,
   });
 
-  const style = {
+  const style: CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? '0.3' : '1',
-    position: isDragging ? 'relative' : undefined,
-    zIndex: isDragging ? '999' : undefined,
+    position: isDragging ? 'relative' as const : undefined,
+    zIndex: isDragging ? 999 : undefined,
   };
 
   const isSelected = selectedBlockId === block.id;
