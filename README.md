@@ -1,53 +1,55 @@
-# LandingKits.com
+# LandingKits
 
-Platform pembuat landing page yang mudah digunakan dengan komponen yang dapat di-drag and drop.
+Platform untuk membuat landing page dengan mudah menggunakan drag-and-drop builder.
 
 ## Fitur
 
-- Editor visual drag-and-drop
+- Drag and drop builder
 - Komponen yang dapat disesuaikan
-- Tema yang responsif
+- Tema yang dapat diubah
 - Ekspor ke HTML statis
-- Simpan dan muat template
+- Preview langsung
+- Responsif
 
 ## Teknologi
 
 - Next.js 14
 - React 18
-- TypeScript
 - Tailwind CSS
-- DND Kit
+- TypeScript
 - Zustand
+- DND Kit
 
-## Memulai
+## Deployment
 
-1. Clone repository:
-```bash
-git clone https://github.com/yourusername/landingkits.com.git
-cd landingkits.com
-```
+Aplikasi ini di-deploy menggunakan Vercel. Untuk deploy sendiri:
 
-2. Install dependencies:
-```bash
-npm install
-```
-
-3. Jalankan development server:
-```bash
-npm run dev
-```
-
-4. Buka [http://localhost:3000](http://localhost:3000) di browser Anda.
-
-## Deploy
-
-Proyek ini dapat di-deploy menggunakan [Vercel](https://vercel.com):
-
-1. Push kode ke GitHub repository
-2. Kunjungi [Vercel](https://vercel.com)
-3. Import proyek dari GitHub
+1. Fork repository ini
+2. Buat project baru di Vercel
+3. Import repository yang sudah di-fork
 4. Deploy!
 
-## Lisensi
+## Development
+
+```bash
+# Install dependencies
+npm install
+
+# Run development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Start production server
+npm start
+```
+
+## License
 
 MIT
+
+## Update Log
+
+- 2024-03-19: Initial release
+- 2024-03-20: Fix deployment issues
