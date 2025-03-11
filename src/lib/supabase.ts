@@ -1,9 +1,17 @@
 import { createClient } from '@supabase/supabase-js';
 
 const getBaseUrl = () => {
-  if (process.env.NODE_ENV === 'production') {
-    return 'https://landingkit.com';
+  const vercelUrl = process.env.NEXT_PUBLIC_VERCEL_URL;
+  const environment = process.env.NODE_ENV;
+
+  if (environment === 'production') {
+    return 'https://landingkits.com';
   }
+
+  if (vercelUrl) {
+    return `https://${vercelUrl}`;
+  }
+
   return 'http://localhost:3000';
 };
 
@@ -65,6 +73,12 @@ export interface Template {
 // Helper functions untuk auth
 export const signUp = async (email: string, password: string, fullName: string) => {
   const supabase = createClientSupabaseClient();
+  const redirectTo = typeof window !== 'undefined' 
+    ? `${window.location.origin}/auth/callback`
+    : `${getBaseUrl()}/auth/callback`;
+
+  console.log('Redirect URL:', redirectTo); // untuk debugging
+
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -72,7 +86,7 @@ export const signUp = async (email: string, password: string, fullName: string) 
       data: {
         full_name: fullName,
       },
-      emailRedirectTo: `${getBaseUrl()}/auth/callback`,
+      emailRedirectTo: redirectTo,
     },
   });
   return { data, error };
