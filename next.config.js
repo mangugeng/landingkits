@@ -1,14 +1,19 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+    output: 'standalone',
     images: {
         remotePatterns: [
             {
                 protocol: 'https',
-                hostname: 'via.placeholder.com',
+                hostname: 'ui-avatars.com',
+                port: '',
+                pathname: '/**',
             },
             {
                 protocol: 'https',
-                hostname: 'ui-avatars.com',
+                hostname: 'azybkaoytjcgdqrqanss.supabase.co',
+                port: '',
+                pathname: '/**',
             },
         ],
         dangerouslyAllowSVG: true,

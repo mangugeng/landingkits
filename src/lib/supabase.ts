@@ -1,9 +1,47 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const getBaseUrl = () => {
+  if (process.env.NODE_ENV === 'production') {
+    return 'https://landingkit.com';
+  }
+  return 'http://localhost:3000';
+};
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+let clientInstance: ReturnType<typeof createClient> | null = null;
+
+export const createServerSupabaseClient = () => {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error('Missing Supabase environment variables');
+  }
+
+  return createClient(supabaseUrl, supabaseKey);
+};
+
+export const createClientSupabaseClient = () => {
+  if (clientInstance) return clientInstance;
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error('Missing Supabase environment variables');
+  }
+
+  clientInstance = createClient(supabaseUrl, supabaseKey, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+      flowType: 'pkce',
+      storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+    },
+  });
+
+  return clientInstance;
+};
 
 // Helper untuk tipe data
 export interface UserData {
@@ -26,6 +64,7 @@ export interface Template {
 
 // Helper functions untuk auth
 export const signUp = async (email: string, password: string, fullName: string) => {
+  const supabase = createClientSupabaseClient();
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -33,12 +72,14 @@ export const signUp = async (email: string, password: string, fullName: string) 
       data: {
         full_name: fullName,
       },
+      emailRedirectTo: `${getBaseUrl()}/auth/callback`,
     },
   });
   return { data, error };
 };
 
 export const signIn = async (email: string, password: string) => {
+  const supabase = createClientSupabaseClient();
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
@@ -47,12 +88,14 @@ export const signIn = async (email: string, password: string) => {
 };
 
 export const signOut = async () => {
+  const supabase = createClientSupabaseClient();
   const { error } = await supabase.auth.signOut();
   return { error };
 };
 
 // Helper functions untuk templates
 export const saveTemplate = async (template: Omit<Template, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
+  const supabase = createClientSupabaseClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Not authenticated');
 
@@ -71,6 +114,7 @@ export const saveTemplate = async (template: Omit<Template, 'id' | 'created_at' 
 };
 
 export const getTemplates = async (userId?: string) => {
+  const supabase = createClientSupabaseClient();
   let query = supabase
     .from('templates')
     .select('*');
