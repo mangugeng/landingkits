@@ -1,18 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
 
-const getBaseUrl = () => {
-  const vercelUrl = process.env.NEXT_PUBLIC_VERCEL_URL;
-  const environment = process.env.NODE_ENV;
+const SITE_URL = 'https://landingkits.com';
 
-  if (environment === 'production') {
-    return 'https://landingkits.com';
-  }
-
-  if (vercelUrl) {
-    return `https://${vercelUrl}`;
-  }
-
-  return 'http://localhost:3000';
+const getRedirectUrl = () => {
+  // Selalu gunakan domain production untuk redirect URL
+  return `${SITE_URL}/auth/callback`;
 };
 
 let clientInstance: ReturnType<typeof createClient> | null = null;
@@ -73,11 +65,9 @@ export interface Template {
 // Helper functions untuk auth
 export const signUp = async (email: string, password: string, fullName: string) => {
   const supabase = createClientSupabaseClient();
-  const redirectTo = typeof window !== 'undefined' 
-    ? `${window.location.origin}/auth/callback`
-    : `${getBaseUrl()}/auth/callback`;
-
-  console.log('Redirect URL:', redirectTo); // untuk debugging
+  const redirectUrl = getRedirectUrl();
+  
+  console.log('Using redirect URL:', redirectUrl);
 
   const { data, error } = await supabase.auth.signUp({
     email,
@@ -86,7 +76,7 @@ export const signUp = async (email: string, password: string, fullName: string) 
       data: {
         full_name: fullName,
       },
-      emailRedirectTo: redirectTo,
+      emailRedirectTo: redirectUrl,
     },
   });
   return { data, error };
