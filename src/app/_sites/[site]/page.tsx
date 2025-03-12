@@ -46,7 +46,10 @@ async function getTemplateBySubdomain(subdomain: string): Promise<Template | nul
       updatedAt: template.updated_at,
       userId: template.user_id,
       subdomain: template.subdomain,
+      custom_domain: template.custom_domain,
       status,
+      is_public: template.is_public,
+      description: template.description,
       views: template.views || 0
     }
   } catch (error) {

@@ -1,40 +1,20 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { nanoid } from 'nanoid';
+import { Block, BlockType, BlockProps } from '@/lib/types';
 
-export type BlockType = 
-  | 'hero' 
-  | 'navbar'
-  | 'header'
-  | 'features' 
-  | 'content'
-  | 'stats'
-  | 'team'
-  | 'faq'
-  | 'testimonials'
-  | 'logos'
-  | 'reviews' 
-  | 'pricing'
-  | 'cta'
-  | 'newsletter'
-  | 'contact'
-  | 'footer'
-  | 'simpleFooter';
-
-export interface BlockProps {
-  [key: string]: string | number | boolean | undefined;
-}
-
-export interface Block {
-  id: string;
-  type: BlockType;
-  props: BlockProps;
-}
-
-export interface Template {
+export interface EditorTemplate {
   name: string;
   blocks: Block[];
-  createdAt: string;
+  created_at: string;
+  updated_at: string;
+  user_id: string;
+  subdomain?: string;
+  custom_domain?: string;
+  status: 'draft' | 'published';
+  is_public: boolean;
+  description?: string;
+  views: number;
 }
 
 // Fungsi untuk mendapatkan properti default berdasarkan tipe blok
@@ -224,7 +204,7 @@ interface EditorState {
   blocks: Block[];
   selectedBlock: Block | null;
   previewMode: boolean;
-  templates: Template[];
+  templates: EditorTemplate[];
   setBlocks: (blocks: Block[]) => void;
   addBlock: (block: Block) => void;
   removeBlock: (id: string) => void;
@@ -232,7 +212,7 @@ interface EditorState {
   updateBlock: (id: string, props: Record<string, any>) => void;
   setSelectedBlock: (id: string | null) => void;
   togglePreviewMode: () => void;
-  saveTemplate: (template: Template) => void;
+  saveTemplate: (template: EditorTemplate) => void;
   loadTemplate: (name: string) => void;
   deleteTemplate: (name: string) => void;
   clearCanvas: () => void;
@@ -292,7 +272,7 @@ const useEditor = create(
             newTemplates.push(template);
           }
 
-          newTemplates.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+          newTemplates.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
           return { templates: newTemplates };
         }),
