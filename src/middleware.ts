@@ -15,8 +15,8 @@ export async function middleware(req: NextRequest) {
     const subdomain = hostname.split('.')[0];
     const isSubdomain = hostname.includes('landingkits.com') && subdomain !== 'www' && subdomain !== 'landingkits';
 
-    // If it's a subdomain request, rewrite to the template page
-    if (isSubdomain) {
+    // If it's a subdomain request and not already in _sites
+    if (isSubdomain && !url.pathname.startsWith('/_sites')) {
       console.log('🌐 Subdomain detected:', subdomain);
       const templateUrl = new URL(`/_sites/${subdomain}${url.pathname}`, url);
       return NextResponse.rewrite(templateUrl);
@@ -80,13 +80,13 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    // Handle specific routes
-    '/dashboard/:path*',
-    '/editor/:path*',
-    '/login',
-    '/register',
-    // Handle subdomains
-    '/',
-    '/_sites/:path*'
-  ]
+    /*
+     * Match all paths except:
+     * 1. /api routes
+     * 2. /_next (Next.js internals)
+     * 3. /_static (inside /public)
+     * 4. all root files inside /public (e.g. /favicon.ico)
+     */
+    '/((?!api/|_next/|_static/|_vercel|[\\w-]+\\.\\w+).*)',
+  ],
 }; 
