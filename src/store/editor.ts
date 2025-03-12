@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { nanoid } from 'nanoid';
 
 export type BlockType = 
@@ -239,93 +240,104 @@ interface EditorState {
   moveBlock: (fromIndex: number, toIndex: number) => void;
 }
 
-const useEditor = create<EditorState>((set) => ({
-  blocks: [],
-  selectedBlock: null,
-  previewMode: false,
-  templates: [],
+const useEditor = create(
+  persist<EditorState>(
+    (set) => ({
+      blocks: [],
+      selectedBlock: null,
+      previewMode: false,
+      templates: [],
 
-  setBlocks: (blocks) => set({ blocks }),
+      setBlocks: (blocks) => set({ blocks }),
 
-  addBlock: (block) =>
-    set((state) => ({ blocks: [...state.blocks, block] })),
+      addBlock: (block) =>
+        set((state) => ({ blocks: [...state.blocks, block] })),
 
-  removeBlock: (id) =>
-    set((state) => ({
-      blocks: state.blocks.filter((block) => block.id !== id),
-      selectedBlock: state.selectedBlock?.id === id ? null : state.selectedBlock,
-    })),
+      removeBlock: (id) =>
+        set((state) => ({
+          blocks: state.blocks.filter((block) => block.id !== id),
+          selectedBlock: state.selectedBlock?.id === id ? null : state.selectedBlock,
+        })),
 
-  reorderBlocks: (oldIndex, newIndex) =>
-    set((state) => {
-      const blocks = [...state.blocks];
-      const [removed] = blocks.splice(oldIndex, 1);
-      blocks.splice(newIndex, 0, removed);
-      return { blocks };
+      reorderBlocks: (oldIndex, newIndex) =>
+        set((state) => {
+          const blocks = [...state.blocks];
+          const [removed] = blocks.splice(oldIndex, 1);
+          blocks.splice(newIndex, 0, removed);
+          return { blocks };
+        }),
+
+      updateBlock: (id, props) =>
+        set((state) => ({
+          blocks: state.blocks.map((block) =>
+            block.id === id ? { ...block, props: { ...block.props, ...props } } : block
+          ),
+        })),
+
+      setSelectedBlock: (id: string | null) => 
+        set((state) => ({ 
+          selectedBlock: id ? state.blocks.find(block => block.id === id) || null : null 
+        })),
+
+      togglePreviewMode: () => set((state) => ({ previewMode: !state.previewMode })),
+
+      saveTemplate: (template) =>
+        set((state) => {
+          const existingIndex = state.templates.findIndex(t => t.name === template.name);
+          const newTemplates = [...state.templates];
+          
+          if (existingIndex !== -1) {
+            newTemplates[existingIndex] = template;
+          } else {
+            newTemplates.push(template);
+          }
+
+          newTemplates.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+          return { templates: newTemplates };
+        }),
+
+      loadTemplate: (name) =>
+        set((state) => {
+          const template = state.templates.find((t) => t.name === name);
+          if (!template) return state;
+
+          const newBlocks = template.blocks.map((block) => ({
+            ...block,
+            id: nanoid(),
+          }));
+
+          return {
+            blocks: newBlocks,
+            selectedBlock: null,
+          };
+        }),
+
+      deleteTemplate: (name) =>
+        set((state) => ({
+          templates: state.templates.filter((t) => t.name !== name),
+        })),
+
+      clearCanvas: () => set({ blocks: [], selectedBlock: null }),
+
+      selectBlock: (block) => set({ selectedBlock: block }),
+
+      moveBlock: (fromIndex, toIndex) =>
+        set((state) => {
+          const blocks = [...state.blocks];
+          const [removed] = blocks.splice(fromIndex, 1);
+          blocks.splice(toIndex, 0, removed);
+          return { blocks };
+        }),
     }),
-
-  updateBlock: (id, props) =>
-    set((state) => ({
-      blocks: state.blocks.map((block) =>
-        block.id === id ? { ...block, props: { ...block.props, ...props } } : block
-      ),
-    })),
-
-  setSelectedBlock: (id: string | null) => 
-    set((state) => ({ 
-      selectedBlock: id ? state.blocks.find(block => block.id === id) || null : null 
-    })),
-
-  togglePreviewMode: () => set((state) => ({ previewMode: !state.previewMode })),
-
-  saveTemplate: (template) =>
-    set((state) => {
-      const existingIndex = state.templates.findIndex(t => t.name === template.name);
-      const newTemplates = [...state.templates];
-      
-      if (existingIndex !== -1) {
-        newTemplates[existingIndex] = template;
-      } else {
-        newTemplates.push(template);
-      }
-
-      newTemplates.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-
-      return { templates: newTemplates };
-    }),
-
-  loadTemplate: (name) =>
-    set((state) => {
-      const template = state.templates.find((t) => t.name === name);
-      if (!template) return state;
-
-      const newBlocks = template.blocks.map((block) => ({
-        ...block,
-        id: nanoid(),
-      }));
-
-      return {
-        blocks: newBlocks,
-        selectedBlock: null,
-      };
-    }),
-
-  deleteTemplate: (name) =>
-    set((state) => ({
-      templates: state.templates.filter((t) => t.name !== name),
-    })),
-
-  clearCanvas: () => set({ blocks: [], selectedBlock: null }),
-
-  selectBlock: (block) => set({ selectedBlock: block }),
-
-  moveBlock: (fromIndex, toIndex) =>
-    set((state) => {
-      const blocks = [...state.blocks];
-      const [removed] = blocks.splice(fromIndex, 1);
-      blocks.splice(toIndex, 0, removed);
-      return { blocks };
-    }),
-}));
+    {
+      name: 'editor-storage',
+      partialize: (state) => ({ 
+        blocks: state.blocks,
+        templates: state.templates 
+      }),
+    }
+  )
+);
 
 export { useEditor }; 

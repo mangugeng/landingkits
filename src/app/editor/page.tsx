@@ -13,6 +13,8 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useEditor } from '@/store/editor';
 import { useUser } from '@/lib/hooks/use-user';
 import { useToast } from '@/components/ui/use-toast';
+import { getTemplate } from '@/lib/templates';
+import Editor from '@/components/editor/Editor';
 
 function EditorContent() {
   const router = useRouter();
@@ -24,6 +26,7 @@ function EditorContent() {
   const reorderBlocks = useEditor((state) => state.reorderBlocks);
   const blocks = useEditor((state) => state.blocks);
   const previewMode = useEditor((state) => state.previewMode);
+  const setBlocks = useEditor((state) => state.setBlocks);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -57,6 +60,34 @@ function EditorContent() {
       router.push('/login');
     }
   }, [user, loading, router, toast]);
+
+  useEffect(() => {
+    const loadTemplate = async () => {
+      try {
+        const templateId = searchParams.get('template');
+        
+        if (templateId) {
+          const template = await getTemplate(templateId);
+          if (template) {
+            setBlocks(template.blocks);
+          }
+        } else {
+          // Jika tidak ada template ID, coba ambil dari localStorage
+          const storedState = localStorage.getItem('editor-storage');
+          if (storedState) {
+            const { state } = JSON.parse(storedState);
+            if (state.blocks && state.blocks.length > 0) {
+              setBlocks(state.blocks);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error loading template:', error);
+      }
+    };
+
+    loadTemplate();
+  }, [searchParams, setBlocks]);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
