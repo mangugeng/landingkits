@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation';
 import DashboardClient from './DashboardClient';
 
 export const dynamic = 'force-dynamic';
-export const runtime = 'edge';
 
 export default async function DashboardPage({
   searchParams,
@@ -11,29 +10,38 @@ export default async function DashboardPage({
   searchParams: { [key: string]: string | string[] | undefined }
 }) {
   try {
-    console.log('📱 Dashboard page loading...');
+    console.log('📱 Dashboard page loading...', { searchParams });
     
     const supabase = createServerSupabaseClient();
     console.log('🔌 Supabase client created');
     
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    const sessionPromise = supabase.auth.getSession();
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Session fetch timeout')), 5000)
+    );
     
-    if (sessionError) {
-      console.error('❌ Session error:', sessionError.message);
-      throw sessionError;
-    }
-
-    console.log('🔑 Session check result:', {
+    const { data: { session }, error: sessionError } = await Promise.race([
+      sessionPromise,
+      timeoutPromise
+    ]) as any;
+    
+    console.log('🔑 Session check complete', {
       hasSession: !!session,
-      error: sessionError?.message
+      error: sessionError?.message,
+      userId: session?.user?.id
     });
+
+    if (sessionError) {
+      console.error('❌ Session error:', sessionError);
+      return redirect('/login?error=session_error&noLoop=true');
+    }
 
     if (!session) {
       console.log('🚫 No session found, redirecting to login');
-      redirect('/login?noLoop=true');
+      return redirect('/login?error=no_session&noLoop=true');
     }
 
-    console.log('✅ Session found, fetching templates');
+    console.log('✅ Session found, fetching templates for user:', session.user.id);
     const { data: templates, error: templatesError } = await supabase
       .from('templates')
       .select('*')
@@ -41,13 +49,19 @@ export default async function DashboardPage({
       .order('created_at', { ascending: false });
 
     if (templatesError) {
-      console.error('❌ Error fetching templates:', templatesError.message);
-      throw templatesError;
+      console.error('❌ Templates error:', templatesError);
+      throw new Error(`Failed to fetch templates: ${templatesError.message}`);
     }
 
+    console.log('📋 Templates fetched:', templates?.length || 0);
     return <DashboardClient initialTemplates={templates || []} user={session.user} />;
-  } catch (error) {
-    console.error('❌ Dashboard error:', error);
-    redirect('/login?error=server_error&noLoop=true');
+  } catch (error: any) {
+    console.error('❌ Dashboard error:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
+    
+    return redirect(`/login?error=server_error&code=${encodeURIComponent(error.message || 'unknown')}&noLoop=true`);
   }
 } 
