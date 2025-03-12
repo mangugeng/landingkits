@@ -34,6 +34,15 @@ export async function middleware(req: NextRequest) {
     // Handle subdomains
     const url = req.nextUrl;
     const hostname = req.headers.get('host') || '';
+    console.log('🌐 Hostname:', hostname);
+
+    // Jika mengakses langsung ke _sites, redirect ke homepage
+    if (url.pathname.startsWith('/_sites')) {
+      console.log('⚠️ Direct access to _sites, redirecting to homepage');
+      return NextResponse.redirect(new URL('https://landingkits.com'));
+    }
+
+    // Check if it's a subdomain request
     const subdomain = hostname.split('.')[0];
     const isSubdomainRequest = hostname.includes('landingkits.com') && subdomain !== 'www' && subdomain !== 'landingkits';
 
@@ -49,7 +58,7 @@ export async function middleware(req: NextRequest) {
       }
 
       // Rewrite ke halaman template
-      const templateUrl = new URL(`/_sites/${subdomain}`, req.url);
+      const templateUrl = new URL(`/_sites/${subdomain}${url.pathname}`, req.url);
       console.log('🔄 Rewriting to:', templateUrl.toString());
       return NextResponse.rewrite(templateUrl);
     }
@@ -103,22 +112,23 @@ export async function middleware(req: NextRequest) {
     return res;
   } catch (error) {
     console.error('❌ Middleware error:', error);
-    // Jika terjadi error, arahkan ke halaman login dengan parameter noLoop
-    const redirectUrl = new URL('/login', req.url);
-    redirectUrl.searchParams.set('noLoop', 'true');
-    return NextResponse.redirect(redirectUrl);
+    return NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
   }
 }
 
 export const config = {
   matcher: [
     /*
-     * Match all paths except:
-     * 1. /api routes
-     * 2. /_next (Next.js internals)
-     * 3. /_static (inside /public)
-     * 4. all root files inside /public (e.g. /favicon.ico)
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
      */
-    '/((?!api/|_next/|_static/|_vercel|[\\w-]+\\.\\w+).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
 }; 
