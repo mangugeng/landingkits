@@ -13,7 +13,25 @@ export const createServerSupabaseClient = () => {
     throw new Error('Missing Supabase environment variables');
   }
 
-  return createClient(supabaseUrl, supabaseKey);
+  return createClient(supabaseUrl, supabaseKey, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+      flowType: 'pkce',
+      storage: {
+        getItem: (key) => {
+          throw new Error('getItem is not implemented on server');
+        },
+        setItem: (key, value) => {
+          throw new Error('setItem is not implemented on server');
+        },
+        removeItem: (key) => {
+          throw new Error('removeItem is not implemented on server');
+        },
+      },
+    },
+  });
 };
 
 export const createClientSupabaseClient = () => {
@@ -28,8 +46,8 @@ export const createClientSupabaseClient = () => {
 
   clientInstance = createClient(supabaseUrl, supabaseKey, {
     auth: {
-      autoRefreshToken: true,
       persistSession: true,
+      autoRefreshToken: true,
       detectSessionInUrl: true,
       flowType: 'pkce',
       storage: typeof window !== 'undefined' ? window.localStorage : undefined,
