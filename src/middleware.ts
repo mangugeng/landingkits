@@ -59,8 +59,9 @@ export async function middleware(req: NextRequest) {
       }
 
       // Rewrite ke halaman template
-      const templateUrl = new URL(`/_sites/${subdomain}${url.pathname}`, url);
-      return NextResponse.rewrite(templateUrl);
+      const templateUrl = new URL(`/_sites/${subdomain}`, req.url).toString();
+      console.log('🔄 Rewriting to:', templateUrl);
+      return NextResponse.rewrite(new URL(templateUrl));
     }
 
     // Jika ada parameter noLoop, skip middleware
