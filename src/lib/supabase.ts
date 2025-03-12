@@ -6,44 +6,43 @@ const REDIRECT_URL = `${SITE_URL}/auth/callback`;
 let clientInstance: ReturnType<typeof createClient> | null = null;
 
 export const createServerSupabaseClient = () => {
+  console.log('🔧 Creating server Supabase client');
+  
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !supabaseKey) {
+    console.error('❌ Missing Supabase environment variables');
     throw new Error('Missing Supabase environment variables');
   }
 
   return createClient(supabaseUrl, supabaseKey, {
     auth: {
-      persistSession: true,
-      autoRefreshToken: true,
+      persistSession: false,
+      autoRefreshToken: false,
       detectSessionInUrl: true,
       flowType: 'pkce',
-      storage: {
-        getItem: (key) => {
-          throw new Error('getItem is not implemented on server');
-        },
-        setItem: (key, value) => {
-          throw new Error('setItem is not implemented on server');
-        },
-        removeItem: (key) => {
-          throw new Error('removeItem is not implemented on server');
-        },
-      },
     },
   });
 };
 
 export const createClientSupabaseClient = () => {
-  if (clientInstance) return clientInstance;
+  console.log('🔧 Creating client Supabase client');
+  
+  if (clientInstance) {
+    console.log('♻️ Reusing existing client instance');
+    return clientInstance;
+  }
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !supabaseKey) {
+    console.error('❌ Missing Supabase environment variables');
     throw new Error('Missing Supabase environment variables');
   }
 
+  console.log('🆕 Creating new client instance');
   clientInstance = createClient(supabaseUrl, supabaseKey, {
     auth: {
       persistSession: true,
