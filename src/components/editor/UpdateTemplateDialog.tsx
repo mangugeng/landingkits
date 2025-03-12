@@ -33,10 +33,10 @@ export default function UpdateTemplateDialog({
       }
 
       // Update template
-      await updateTemplate({
-        id: templateId,
-        blocks: blocks,
-      });
+      await updateTemplate(
+        templateId,
+        { blocks }
+      );
 
       toast.success('Template berhasil diupdate');
       onOpenChange(false);

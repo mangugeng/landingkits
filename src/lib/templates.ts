@@ -194,51 +194,34 @@ export async function deleteTemplate(id: string) {
   if (error) throw error;
 }
 
-export async function updateTemplate(id: string, updates: Partial<Template>) {
-  const supabase = createClient();
-  
-  const { data: session } = await supabase.auth.getSession();
-  if (!session?.session?.user) {
-    throw new Error('Unauthorized');
-  }
-
-  const { data, error } = await supabase
-    .from('templates')
-    .update({
-      ...updates,
-      updated_at: new Date().toISOString()
-    })
-    .eq('id', id)
-    .eq('user_id', session.session.user.id)
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data;
-}
-
-export async function updateTemplate({
-  id,
-  blocks,
-}: {
-  id: string;
-  blocks: any[];
-}) {
+export async function updateTemplate(
+  id: string,
+  updates: Partial<Template> | { blocks: any[] }
+) {
   try {
     const supabase = createClient();
     
-    const { data: template, error: templateError } = await supabase
+    const { data: session } = await supabase.auth.getSession();
+    if (!session?.session?.user) {
+      throw new Error('Unauthorized');
+    }
+
+    const { data, error } = await supabase
       .from('templates')
-      .update({ blocks })
+      .update({
+        ...updates,
+        updated_at: new Date().toISOString()
+      })
       .eq('id', id)
+      .eq('user_id', session.session.user.id)
       .select()
       .single();
 
-    if (templateError) {
-      throw new Error(templateError.message);
+    if (error) {
+      throw new Error(error.message);
     }
 
-    return template;
+    return data;
   } catch (error: any) {
     console.error('Error updating template:', error);
     throw new Error(error.message || 'Failed to update template');
