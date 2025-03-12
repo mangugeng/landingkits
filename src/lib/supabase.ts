@@ -1,9 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
+import type { User } from '@supabase/supabase-js';
 
 const SITE_URL = 'https://landingkits.com';
 const REDIRECT_URL = `${SITE_URL}/auth/callback`;
 
 let clientInstance: ReturnType<typeof createClient> | null = null;
+
+export type { User };
 
 export const createClientSupabaseClient = () => {
   console.log('🔧 Creating client Supabase client');
