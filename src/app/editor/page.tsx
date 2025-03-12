@@ -2,19 +2,20 @@
 
 import { DragEndEvent } from '@dnd-kit/core';
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useEditorStore } from '@/store/editor';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { createClient } from '@/lib/supabase';
 import Sidebar from '@/components/editor/Sidebar';
 import Canvas from '@/components/editor/Canvas';
 import PropertyPanel from '@/components/editor/PropertyPanel';
 import Toolbar from '@/components/editor/Toolbar';
 import DndProvider from '@/components/editor/DndProvider';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { createClientSupabaseClient } from '@/lib/supabase';
+import { useEditorStore } from '@/store/editor';
 
 export default function EditorPage() {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
+  const searchParams = useSearchParams();
+  const [isLoading, setIsLoading] = useState(true);
   const addBlock = useEditorStore((state) => state.addBlock);
   const reorderBlocks = useEditorStore((state) => state.reorderBlocks);
   const blocks = useEditorStore((state) => state.blocks);
@@ -23,19 +24,19 @@ export default function EditorPage() {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const supabase = createClientSupabaseClient();
+        const supabase = createClient();
         const { data: { session } } = await supabase.auth.getSession();
 
         if (!session) {
-          console.log('No session found in editor, redirecting to login');
-          router.push('/login?redirectTo=/editor&noLoop=true');
+          const currentPath = window.location.pathname;
+          router.push(`/login?redirectTo=${encodeURIComponent(currentPath)}`);
           return;
         }
 
-        setLoading(false);
+        setIsLoading(false);
       } catch (error) {
-        console.error('Error checking session in editor:', error);
-        router.push('/login?redirectTo=/editor&noLoop=true');
+        console.error('Error checking session:', error);
+        router.push('/login');
       }
     };
 
@@ -65,13 +66,12 @@ export default function EditorPage() {
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-medium text-gray-900">
-            Memuat editor...
-          </h2>
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
+          <p className="mt-4 text-gray-600">Memuat editor...</p>
         </div>
       </div>
     );

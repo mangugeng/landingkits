@@ -6,7 +6,7 @@ export const runtime = 'edge';
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { signIn, createClientSupabaseClient } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -28,7 +28,7 @@ export default function LoginPage() {
         }
 
         console.log('🔍 Checking session...');
-        const supabase = createClientSupabaseClient();
+        const supabase = createClient();
         const { data: { session } } = await supabase.auth.getSession();
         
         if (session) {
@@ -52,7 +52,11 @@ export default function LoginPage() {
 
     try {
       console.log('📝 Submitting login form...');
-      const { data, error } = await signIn(email, password);
+      const supabase = createClient();
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
       
       if (error) {
         console.error('❌ Login error:', error.message);

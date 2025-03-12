@@ -2,7 +2,8 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { Template, User, createClientSupabaseClient } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase';
+import { Template, User } from '@/lib/types';
 import { PostgrestResponse } from '@supabase/supabase-js';
 
 export default function DashboardClient() {
@@ -10,11 +11,12 @@ export default function DashboardClient() {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadDashboardData = async () => {
       try {
-        const supabase = createClientSupabaseClient();
+        const supabase = createClient();
         
         // Get session
         const { data: { session } } = await supabase.auth.getSession();
@@ -38,8 +40,9 @@ export default function DashboardClient() {
 
         setTemplates(data || []);
         setLoading(false);
-      } catch (error) {
-        console.error('Error loading dashboard data:', error);
+      } catch (err: any) {
+        console.error('Error loading dashboard data:', err);
+        setError(err.message);
         setLoading(false);
       }
     };
@@ -48,7 +51,7 @@ export default function DashboardClient() {
   }, [router]);
 
   const handleSignOut = async () => {
-    const supabase = createClientSupabaseClient();
+    const supabase = createClient();
     await supabase.auth.signOut();
     router.push('/login');
   };
@@ -56,7 +59,7 @@ export default function DashboardClient() {
   const handleCreateNew = async () => {
     try {
       // Verifikasi session sebelum navigasi
-      const supabase = createClientSupabaseClient();
+      const supabase = createClient();
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
@@ -74,7 +77,7 @@ export default function DashboardClient() {
   const handleEditTemplate = async (templateId: string) => {
     try {
       // Verifikasi session sebelum navigasi
-      const supabase = createClientSupabaseClient();
+      const supabase = createClient();
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
@@ -93,7 +96,7 @@ export default function DashboardClient() {
     if (!confirm('Apakah Anda yakin ingin menghapus template ini?')) return;
 
     try {
-      const supabase = createClientSupabaseClient();
+      const supabase = createClient();
       
       // Verifikasi session sebelum delete
       const { data: { session } } = await supabase.auth.getSession();
@@ -128,6 +131,36 @@ export default function DashboardClient() {
         </nav>
         <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
           <div className="text-center">Memuat data...</div>
+        </main>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <nav className="bg-white shadow">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between h-16">
+              <div className="flex items-center">
+                <h1 className="text-xl font-bold">Dashboard</h1>
+              </div>
+              <div className="flex items-center">
+                <span className="text-gray-700 mr-4">{user?.email}</span>
+                <button
+                  onClick={handleSignOut}
+                  className="text-gray-600 hover:text-gray-900"
+                >
+                  Keluar
+                </button>
+              </div>
+            </div>
+          </div>
+        </nav>
+        <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <p className="text-red-800">Error: {error}</p>
+          </div>
         </main>
       </div>
     );
