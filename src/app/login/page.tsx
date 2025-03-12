@@ -22,13 +22,25 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const { error } = await signIn(email, password);
-      if (error) throw error;
+      console.log('📝 Submitting login form...');
+      const { data, error } = await signIn(email, password);
+      
+      if (error) {
+        console.error('❌ Login error:', error.message);
+        throw error;
+      }
 
+      if (!data?.session) {
+        console.error('❌ No session after login');
+        throw new Error('No session created after login');
+      }
+
+      console.log('✅ Login successful, redirecting...');
       const redirectTo = searchParams.get('redirectTo') || '/dashboard';
       router.push(redirectTo);
     } catch (error: any) {
-      setError(error.message || 'Terjadi kesalahan saat login');
+      console.error('❌ Login error:', error);
+      setError(error.message || 'Email atau password salah');
     } finally {
       setLoading(false);
     }

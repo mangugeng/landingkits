@@ -106,12 +106,32 @@ export const signUp = async (email: string, password: string, fullName: string) 
 };
 
 export const signIn = async (email: string, password: string) => {
+  console.log('🔑 Attempting to sign in with email:', email);
+  
   const supabase = createClientSupabaseClient();
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
-  return { data, error };
+  
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      console.error('❌ Sign in error:', error.message);
+      throw error;
+    }
+
+    console.log('✅ Sign in successful:', data.session ? 'Session created' : 'No session');
+    return { data, error: null };
+  } catch (error: any) {
+    console.error('❌ Sign in error:', error.message);
+    return { 
+      data: null, 
+      error: {
+        message: error.message || 'An error occurred during sign in'
+      }
+    };
+  }
 };
 
 export const signOut = async () => {
