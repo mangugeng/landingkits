@@ -1,11 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
 const SITE_URL = 'https://landingkits.com';
-
-const getRedirectUrl = () => {
-  // Selalu gunakan domain production untuk redirect URL
-  return `${SITE_URL}/auth/callback`;
-};
+const REDIRECT_URL = `${SITE_URL}/auth/callback`;
 
 let clientInstance: ReturnType<typeof createClient> | null = null;
 
@@ -32,8 +28,8 @@ export const createClientSupabaseClient = () => {
 
   clientInstance = createClient(supabaseUrl, supabaseKey, {
     auth: {
-      persistSession: true,
       autoRefreshToken: true,
+      persistSession: true,
       detectSessionInUrl: true,
       flowType: 'pkce',
       storage: typeof window !== 'undefined' ? window.localStorage : undefined,
@@ -65,9 +61,8 @@ export interface Template {
 // Helper functions untuk auth
 export const signUp = async (email: string, password: string, fullName: string) => {
   const supabase = createClientSupabaseClient();
-  const redirectUrl = getRedirectUrl();
   
-  console.log('Using redirect URL:', redirectUrl);
+  console.log('Using redirect URL:', REDIRECT_URL);
 
   const { data, error } = await supabase.auth.signUp({
     email,
@@ -76,7 +71,7 @@ export const signUp = async (email: string, password: string, fullName: string) 
       data: {
         full_name: fullName,
       },
-      emailRedirectTo: redirectUrl,
+      emailRedirectTo: REDIRECT_URL,
     },
   });
   return { data, error };
