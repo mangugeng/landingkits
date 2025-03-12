@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { Template, User, createClientSupabaseClient } from '@/lib/supabase';
+import { PostgrestResponse } from '@supabase/supabase-js';
 
 export default function DashboardClient() {
   const router = useRouter();
@@ -24,14 +25,18 @@ export default function DashboardClient() {
 
         setUser(session.user);
 
-        // Get templates
-        const { data: templates } = await supabase
+        // Get templates with proper typing
+        const { data, error } = await supabase
           .from('templates')
           .select('*')
           .eq('user_id', session.user.id)
-          .order('created_at', { ascending: false });
+          .order('created_at', { ascending: false }) as PostgrestResponse<Template>;
 
-        setTemplates(templates || []);
+        if (error) {
+          throw error;
+        }
+
+        setTemplates(data || []);
         setLoading(false);
       } catch (error) {
         console.error('Error loading dashboard data:', error);
