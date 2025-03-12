@@ -215,4 +215,32 @@ export async function updateTemplate(id: string, updates: Partial<Template>) {
 
   if (error) throw error;
   return data;
+}
+
+export async function updateTemplate({
+  id,
+  blocks,
+}: {
+  id: string;
+  blocks: any[];
+}) {
+  try {
+    const supabase = createClient();
+    
+    const { data: template, error: templateError } = await supabase
+      .from('templates')
+      .update({ blocks })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (templateError) {
+      throw new Error(templateError.message);
+    }
+
+    return template;
+  } catch (error: any) {
+    console.error('Error updating template:', error);
+    throw new Error(error.message || 'Failed to update template');
+  }
 } 

@@ -6,6 +6,7 @@ import { useEditor } from '@/store/editor';
 import { Button } from '@/components/ui/button';
 import SaveTemplateDialog from './SaveTemplateDialog';
 import LoadTemplateDialog from './LoadTemplateDialog';
+import UpdateTemplateDialog from './UpdateTemplateDialog';
 
 interface ToolbarProps {
   onSave?: () => void;
@@ -16,6 +17,7 @@ const Toolbar = ({ onSave, onExport }: ToolbarProps) => {
   const router = useRouter();
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
   const [isLoadDialogOpen, setIsLoadDialogOpen] = useState(false);
+  const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
   
   const blocks = useEditor((state) => state.blocks);
   const previewMode = useEditor((state) => state.previewMode);
@@ -32,6 +34,10 @@ const Toolbar = ({ onSave, onExport }: ToolbarProps) => {
 
   const handleLoad = () => {
     setIsLoadDialogOpen(true);
+  };
+
+  const handleUpdate = () => {
+    setIsUpdateDialogOpen(true);
   };
 
   const handleClear = () => {
@@ -93,6 +99,13 @@ const Toolbar = ({ onSave, onExport }: ToolbarProps) => {
           >
             Simpan Template
           </button>
+
+          <button
+            onClick={handleUpdate}
+            className="px-3 py-1.5 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700"
+          >
+            Update Template
+          </button>
         </div>
       </div>
 
@@ -107,6 +120,13 @@ const Toolbar = ({ onSave, onExport }: ToolbarProps) => {
         <LoadTemplateDialog
           open={isLoadDialogOpen}
           onOpenChange={(open) => setIsLoadDialogOpen(open)}
+        />
+      )}
+
+      {isUpdateDialogOpen && (
+        <UpdateTemplateDialog
+          open={isUpdateDialogOpen}
+          onOpenChange={(open) => setIsUpdateDialogOpen(open)}
         />
       )}
     </>
