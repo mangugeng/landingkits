@@ -173,9 +173,9 @@ export default function SaveTemplateDialog({
             <p className="text-xs text-gray-500">Format: domain.com atau subdomain.domain.com</p>
           </div>
 
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between space-x-4 bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
             <div className="space-y-0.5">
-              <Label htmlFor="public" className="text-gray-900 dark:text-white">Publik</Label>
+              <Label htmlFor="public" className="text-gray-900 dark:text-white font-medium">Publik</Label>
               <div className="text-[0.8rem] text-gray-500 dark:text-gray-400">
                 Template dapat dilihat oleh pengguna lain
               </div>
@@ -184,20 +184,22 @@ export default function SaveTemplateDialog({
               id="public"
               checked={isPublic}
               onCheckedChange={setIsPublic}
+              className="data-[state=checked]:bg-blue-600"
             />
           </div>
 
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between space-x-4 bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
             <div className="space-y-0.5">
-              <Label htmlFor="status" className="text-gray-900 dark:text-white">Status</Label>
+              <Label htmlFor="status" className="text-gray-900 dark:text-white font-medium">Status</Label>
               <div className="text-[0.8rem] text-gray-500 dark:text-gray-400">
-                Pilih status template
+                {status === 'published' ? 'Template dipublikasikan' : 'Template masih draft'}
               </div>
             </div>
             <Switch
               id="status"
               checked={status === 'published'}
               onCheckedChange={(checked) => setStatus(checked ? 'published' : 'draft')}
+              className="data-[state=checked]:bg-blue-600"
             />
           </div>
         </div>

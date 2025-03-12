@@ -175,4 +175,44 @@ export async function incrementTemplateViews(id: string) {
 
   if (error) throw error;
   return data;
+}
+
+export async function deleteTemplate(id: string) {
+  const supabase = createClient();
+  
+  const { data: session } = await supabase.auth.getSession();
+  if (!session?.session?.user) {
+    throw new Error('Unauthorized');
+  }
+
+  const { error } = await supabase
+    .from('templates')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', session.session.user.id);
+
+  if (error) throw error;
+}
+
+export async function updateTemplate(id: string, updates: Partial<Template>) {
+  const supabase = createClient();
+  
+  const { data: session } = await supabase.auth.getSession();
+  if (!session?.session?.user) {
+    throw new Error('Unauthorized');
+  }
+
+  const { data, error } = await supabase
+    .from('templates')
+    .update({
+      ...updates,
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', id)
+    .eq('user_id', session.session.user.id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
 } 
