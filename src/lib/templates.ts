@@ -18,6 +18,10 @@ export async function saveTemplate(
   blocks: any[],
   userId: string,
   subdomain?: string,
+  custom_domain?: string,
+  status: TemplateStatus = 'draft',
+  isPublic: boolean = false,
+  description?: string,
   id?: string
 ) {
   try {
@@ -30,6 +34,10 @@ export async function saveTemplate(
           name,
           blocks,
           subdomain,
+          custom_domain,
+          status,
+          is_public: isPublic,
+          description,
           updated_at: new Date().toISOString(),
         })
         .eq('id', id)
@@ -46,6 +54,10 @@ export async function saveTemplate(
         name,
         blocks,
         subdomain,
+        custom_domain,
+        status,
+        is_public: isPublic,
+        description,
         user_id: userId,
       })
       .select()
@@ -119,10 +131,25 @@ export async function updateTemplateDomain(
     }
   }
 
+  // Check if custom domain is available
+  if (customDomain) {
+    const { data: existing } = await supabase
+      .from('templates')
+      .select('id')
+      .eq('custom_domain', customDomain)
+      .neq('id', id)
+      .single();
+
+    if (existing) {
+      throw new Error('Custom domain sudah digunakan');
+    }
+  }
+
   const { data, error } = await supabase
     .from('templates')
     .update({ 
       subdomain,
+      custom_domain: customDomain,
       updated_at: new Date().toISOString()
     })
     .eq('id', id)

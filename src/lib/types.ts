@@ -8,7 +8,7 @@ export interface Template {
   blocks: EditorBlock[];
   status: TemplateStatus;
   subdomain?: string;
-  customDomain?: string;
+  custom_domain?: string;
   createdAt: string;
   updatedAt: string;
   userId: string;

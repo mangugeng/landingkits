@@ -18,8 +18,12 @@ export interface Database {
           updated_at: string
           user_id: string
           subdomain?: string
+          custom_domain?: string
           status: string
+          is_public: boolean
+          description?: string
           views: number
+          thumbnail?: string
         }
         Insert: {
           id?: string
@@ -29,8 +33,12 @@ export interface Database {
           updated_at?: string
           user_id: string
           subdomain?: string
+          custom_domain?: string
           status?: string
+          is_public?: boolean
+          description?: string
           views?: number
+          thumbnail?: string
         }
         Update: {
           id?: string
@@ -40,8 +48,12 @@ export interface Database {
           updated_at?: string
           user_id?: string
           subdomain?: string
+          custom_domain?: string
           status?: string
+          is_public?: boolean
+          description?: string
           views?: number
+          thumbnail?: string
         }
       }
     }

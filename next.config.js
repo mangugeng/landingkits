@@ -2,6 +2,7 @@
 const nextConfig = {
     output: 'standalone',
     images: {
+        domains: ['landingkits.com', 'www.landingkits.com'],
         remotePatterns: [
             {
                 protocol: 'https',
@@ -15,10 +16,23 @@ const nextConfig = {
                 port: '',
                 pathname: '/**',
             },
+            {
+                protocol: 'https',
+                hostname: 'landingkits.com',
+                port: '',
+                pathname: '/**',
+            },
+            {
+                protocol: 'https',
+                hostname: '*.landingkits.com',
+                port: '',
+                pathname: '/**',
+            }
         ],
         dangerouslyAllowSVG: true,
         contentDispositionType: 'attachment',
         contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+        unoptimized: process.env.NODE_ENV === 'development'
     },
 };
 

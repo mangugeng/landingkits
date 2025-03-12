@@ -22,7 +22,7 @@ const Hero = ({
   subtitle = "Buat landing page yang menarik dalam hitungan menit dengan builder drag-and-drop kami. Tanpa perlu coding.",
   ctaText = "Mulai Sekarang",
   ctaLink = "#",
-  imageUrl = "/placeholder-hero.jpg",
+  imageUrl = "/images/hero-1.jpg",
   imageAlt = "Hero image",
   layout = 'left',
   backgroundColor = 'bg-white',
@@ -63,7 +63,8 @@ const Hero = ({
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 50vw"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
-                target.src = '/placeholder-hero.jpg';
+                target.src = '/images/hero-1.jpg';
+                console.error('Failed to load image:', imageUrl);
               }}
             />
           </div>
