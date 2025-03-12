@@ -6,15 +6,7 @@ export async function middleware(req: NextRequest) {
   console.log('🔒 Middleware running for path:', req.nextUrl.pathname);
   
   const res = NextResponse.next();
-  const supabase = createMiddlewareClient({ req, res }, {
-    cookieOptions: {
-      name: 'sb-auth-token',
-      domain: 'landingkits.com',
-      path: '/',
-      sameSite: 'lax',
-      secure: true
-    }
-  });
+  const supabase = createMiddlewareClient({ req, res });
 
   const {
     data: { session },
@@ -27,6 +19,7 @@ export async function middleware(req: NextRequest) {
   if (!session && (req.nextUrl.pathname.startsWith('/dashboard') || req.nextUrl.pathname.startsWith('/editor'))) {
     console.log('🚫 Access denied: No session found, redirecting to login');
     const redirectUrl = new URL('/login', req.url);
+    redirectUrl.searchParams.set('redirectTo', req.nextUrl.pathname);
     return NextResponse.redirect(redirectUrl);
   }
 
@@ -36,6 +29,11 @@ export async function middleware(req: NextRequest) {
     const redirectUrl = new URL('/dashboard', req.url);
     return NextResponse.redirect(redirectUrl);
   }
+
+  // Tambahkan header untuk mencegah caching
+  res.headers.set('Cache-Control', 'no-store, max-age=0');
+  res.headers.set('Pragma', 'no-cache');
+  res.headers.set('Expires', '0');
 
   return res;
 }

@@ -3,10 +3,10 @@
 export const dynamic = 'force-dynamic';
 export const runtime = 'edge';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { signIn } from '@/lib/supabase';
+import { signIn, createClientSupabaseClient } from '@/lib/supabase';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -15,6 +15,19 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Check session on mount
+  useEffect(() => {
+    const checkSession = async () => {
+      const supabase = createClientSupabaseClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        console.log('🔑 Existing session found, redirecting to dashboard...');
+        router.push('/dashboard');
+      }
+    };
+    checkSession();
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,8 +49,13 @@ export default function LoginPage() {
       }
 
       console.log('✅ Login successful, redirecting...');
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for session to be saved
+      
       const redirectTo = searchParams.get('redirectTo') || '/dashboard';
-      router.push(redirectTo);
+      console.log('🔄 Redirecting to:', redirectTo);
+      
+      // Force hard navigation
+      window.location.href = redirectTo;
     } catch (error: any) {
       console.error('❌ Login error:', error);
       setError(error.message || 'Email atau password salah');
