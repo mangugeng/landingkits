@@ -6,6 +6,7 @@ import { Block } from '@/store/editor'
 import { notFound } from 'next/navigation'
 
 async function getTemplateBySubdomain(subdomain: string): Promise<Template | null> {
+  console.log('🔍 Fetching template for subdomain:', subdomain);
   const supabase = createClient()
   
   try {
@@ -21,14 +22,18 @@ async function getTemplateBySubdomain(subdomain: string): Promise<Template | nul
     }
 
     if (!data) {
+      console.log('❌ No template found for subdomain:', subdomain);
       return null
     }
+
+    console.log('✅ Template found:', data);
 
     const template = data as Database['public']['Tables']['templates']['Row']
     const status = template.status as TemplateStatus || 'draft'
 
     // Jika template masih draft, jangan tampilkan
     if (status === 'draft') {
+      console.log('❌ Template is still in draft status');
       return null
     }
 
@@ -54,11 +59,15 @@ export default async function SitePage({
 }: {
   params: { site: string }
 }) {
+  console.log('🎯 Rendering site page for params:', params);
   const template = await getTemplateBySubdomain(params.site)
 
   if (!template) {
+    console.log('❌ Template not found, showing 404 page');
     notFound()
   }
+
+  console.log('✅ Rendering template:', template.name);
 
   return (
     <main className="min-h-screen">
