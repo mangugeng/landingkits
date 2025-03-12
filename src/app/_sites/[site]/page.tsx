@@ -56,15 +56,25 @@ async function getTemplateBySubdomain(subdomain: string): Promise<Template | nul
 
 export default async function SitePage({
   params,
+  searchParams,
 }: {
   params: { site: string }
+  searchParams: { [key: string]: string | string[] | undefined }
 }) {
   console.log('🎯 Rendering site page for params:', params);
+  console.log('🔍 Search params:', searchParams);
+
+  // Jika ada path yang tidak valid (seperti /docs, /about, dll), redirect ke halaman utama subdomain
+  if (Object.keys(searchParams).length > 0) {
+    console.log('❌ Invalid path detected, redirecting to main page');
+    return notFound();
+  }
+
   const template = await getTemplateBySubdomain(params.site)
 
   if (!template) {
     console.log('❌ Template not found, showing 404 page');
-    notFound()
+    return notFound()
   }
 
   console.log('✅ Rendering template:', template.name);

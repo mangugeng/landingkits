@@ -36,20 +36,15 @@ const nextConfig = {
     },
     async rewrites() {
         return [
-            // Handle subdomain access
+            // Handle subdomain access - catch all paths
             {
-                source: '/',
+                source: '/:path*',
                 has: [
                     {
                         type: 'host',
                         value: '(?<subdomain>[^.]+).landingkits.com',
                     },
                 ],
-                destination: '/_sites/:subdomain',
-            },
-            // Handle direct _sites access
-            {
-                source: '/_sites/:subdomain',
                 destination: '/_sites/:subdomain',
             },
         ];
