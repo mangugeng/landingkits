@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { cookies } from 'next/headers';
 
 const SITE_URL = 'https://landingkits.com';
 const REDIRECT_URL = `${SITE_URL}/auth/callback`;
@@ -16,6 +17,8 @@ export const createServerSupabaseClient = () => {
     throw new Error('Missing Supabase environment variables');
   }
 
+  const cookieStore = cookies();
+
   return createClient(supabaseUrl, supabaseKey, {
     auth: {
       persistSession: true,
@@ -24,13 +27,13 @@ export const createServerSupabaseClient = () => {
       flowType: 'pkce',
       storage: {
         getItem: (key) => {
-          throw new Error('getItem is not implemented on server');
+          return cookieStore.get(key)?.value ?? null;
         },
         setItem: (key, value) => {
-          throw new Error('setItem is not implemented on server');
+          cookieStore.set(key, value);
         },
         removeItem: (key) => {
-          throw new Error('removeItem is not implemented on server');
+          cookieStore.delete(key);
         },
       },
     },

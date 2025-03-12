@@ -10,42 +10,44 @@ export default async function DashboardPage({
 }: {
   searchParams: { [key: string]: string | string[] | undefined }
 }) {
-  console.log('📱 Dashboard page loading...');
-  
-  const supabase = createServerSupabaseClient();
-  console.log('🔌 Supabase client created');
-  
-  const { data: { session }, error } = await supabase.auth.getSession();
-  
-  console.log('🔑 Session check result:', {
-    hasSession: !!session,
-    error: error?.message
-  });
+  try {
+    console.log('📱 Dashboard page loading...');
+    
+    const supabase = createServerSupabaseClient();
+    console.log('🔌 Supabase client created');
+    
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    
+    if (sessionError) {
+      console.error('❌ Session error:', sessionError.message);
+      throw sessionError;
+    }
 
-  if (!session) {
-    console.log('🚫 No session found, redirecting to login');
-    const redirectUrl = new URL('/login', 'https://landingkits.com');
-    redirectUrl.searchParams.set('noLoop', 'true');
-    redirect(redirectUrl.toString());
+    console.log('🔑 Session check result:', {
+      hasSession: !!session,
+      error: sessionError?.message
+    });
+
+    if (!session) {
+      console.log('🚫 No session found, redirecting to login');
+      redirect('/login?noLoop=true');
+    }
+
+    console.log('✅ Session found, fetching templates');
+    const { data: templates, error: templatesError } = await supabase
+      .from('templates')
+      .select('*')
+      .eq('user_id', session.user.id)
+      .order('created_at', { ascending: false });
+
+    if (templatesError) {
+      console.error('❌ Error fetching templates:', templatesError.message);
+      throw templatesError;
+    }
+
+    return <DashboardClient initialTemplates={templates || []} user={session.user} />;
+  } catch (error) {
+    console.error('❌ Dashboard error:', error);
+    redirect('/login?error=server_error&noLoop=true');
   }
-
-  console.log('✅ Session found, fetching templates');
-  const { data: templates, error: templatesError } = await supabase
-    .from('templates')
-    .select('*')
-    .eq('user_id', session.user.id)
-    .order('created_at', { ascending: false });
-
-  if (templatesError) {
-    console.error('❌ Error fetching templates:', templatesError.message);
-  }
-
-  // Hapus parameter noLoop dari URL jika ada
-  if (searchParams.noLoop) {
-    const url = new URL(window.location.href);
-    url.searchParams.delete('noLoop');
-    window.history.replaceState({}, '', url.toString());
-  }
-
-  return <DashboardClient initialTemplates={templates || []} user={session.user} />;
 } 
