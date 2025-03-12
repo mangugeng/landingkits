@@ -6,13 +6,22 @@ export async function middleware(req: NextRequest) {
   console.log('🔒 Middleware running for path:', req.nextUrl.pathname);
   
   const res = NextResponse.next();
-  const supabase = createMiddlewareClient({ req, res });
+  const supabase = createMiddlewareClient({ req, res }, {
+    cookieOptions: {
+      name: 'sb-auth-token',
+      domain: 'landingkits.com',
+      path: '/',
+      sameSite: 'lax',
+      secure: true
+    }
+  });
 
   const {
     data: { session },
   } = await supabase.auth.getSession();
 
   console.log('🔑 Session status:', session ? 'Found' : 'Not found');
+  console.log('🍪 Cookies:', req.cookies.getAll());
 
   // Jika user tidak login dan mencoba mengakses halaman yang dilindungi
   if (!session && (req.nextUrl.pathname.startsWith('/dashboard') || req.nextUrl.pathname.startsWith('/editor'))) {

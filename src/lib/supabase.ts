@@ -18,10 +18,21 @@ export const createServerSupabaseClient = () => {
 
   return createClient(supabaseUrl, supabaseKey, {
     auth: {
-      persistSession: false,
-      autoRefreshToken: false,
+      persistSession: true,
+      autoRefreshToken: true,
       detectSessionInUrl: true,
       flowType: 'pkce',
+      storage: {
+        getItem: (key) => {
+          throw new Error('getItem is not implemented on server');
+        },
+        setItem: (key, value) => {
+          throw new Error('setItem is not implemented on server');
+        },
+        removeItem: (key) => {
+          throw new Error('removeItem is not implemented on server');
+        },
+      },
     },
   });
 };
