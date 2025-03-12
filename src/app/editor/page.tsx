@@ -14,7 +14,6 @@ import { useEditor } from '@/store/editor';
 import { useUser } from '@/lib/hooks/use-user';
 import { useToast } from '@/components/ui/use-toast';
 import { getTemplate } from '@/lib/templates';
-import Editor from '@/components/editor/Editor';
 
 function EditorContent() {
   const router = useRouter();
@@ -112,7 +111,7 @@ function EditorContent() {
     }
   };
 
-  if (loading) {
+  if (loading || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
