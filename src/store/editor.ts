@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { nanoid } from 'nanoid';
-import { Block, BlockType, BlockProps } from '@/lib/types';
+import { Block, BlockType, BlockProps, HeroProps, NavbarProps, HeaderProps, FeaturesProps, ContentProps, StatsProps, TeamProps, FAQProps, TestimonialsProps, LogosProps, ReviewsProps, PricingProps, CTAProps, NewsletterProps, ContactProps, FooterProps, SimpleFooterProps } from '@/lib/types';
 
 export type { Block, BlockType, BlockProps };
 
@@ -36,7 +36,8 @@ const getDefaultProps = (type: BlockType): BlockProps => {
         height: 'normal',
         ctaColor: 'bg-blue-600',
         imagePosition: 'right',
-      };
+      } as HeroProps;
+
     case 'navbar':
       return {
         logo: '/images/logo.svg',
@@ -49,7 +50,8 @@ const getDefaultProps = (type: BlockType): BlockProps => {
         ]),
         buttonText: 'Mulai Sekarang',
         buttonLink: '#',
-      };
+      } as NavbarProps;
+
     case 'header':
       return {
         title: 'Transform your business with our solutions',
@@ -62,7 +64,8 @@ const getDefaultProps = (type: BlockType): BlockProps => {
         textColor: 'text-gray-900',
         gradientFrom: 'from-blue-100/20',
         gradientTo: 'to-white',
-      };
+      } as HeaderProps;
+
     case 'features':
       return {
         title: 'Fitur Unggulan',
@@ -81,14 +84,16 @@ const getDefaultProps = (type: BlockType): BlockProps => {
         ]),
         layout: 'grid',
         columns: '2'
-      };
+      } as FeaturesProps;
+
     case 'content':
       return {
         title: 'Judul Konten',
         content: 'Isi konten Anda di sini',
         imageUrl: '/placeholder.jpg',
         imageAlt: 'Content image',
-      };
+      } as ContentProps;
+
     case 'stats':
       return {
         title: 'Statistik Kami',
@@ -97,7 +102,8 @@ const getDefaultProps = (type: BlockType): BlockProps => {
           { label: 'Transaksi', value: '1M+' },
           { label: 'Rating', value: '4.9/5' },
         ]),
-      };
+      } as StatsProps;
+
     case 'team':
       return {
         title: 'Tim Kami',
@@ -106,7 +112,8 @@ const getDefaultProps = (type: BlockType): BlockProps => {
           { name: 'John Doe', role: 'CEO', imageUrl: '/images/team-1.jpg' },
           { name: 'Jane Smith', role: 'CTO', imageUrl: '/images/team-2.jpg' },
         ]),
-      };
+      } as TeamProps;
+
     case 'faq':
       return {
         title: 'Pertanyaan Umum',
@@ -114,7 +121,8 @@ const getDefaultProps = (type: BlockType): BlockProps => {
           { question: 'Pertanyaan 1?', answer: 'Jawaban 1' },
           { question: 'Pertanyaan 2?', answer: 'Jawaban 2' },
         ]),
-      };
+      } as FAQProps;
+
     case 'testimonials':
       return {
         title: 'Testimoni Pelanggan',
@@ -122,7 +130,8 @@ const getDefaultProps = (type: BlockType): BlockProps => {
           { name: 'Sarah Johnson', text: 'Platform ini sangat membantu kami dalam membangun landing page dengan cepat dan profesional.', role: 'Marketing Manager', company: 'Tech Corp', imageUrl: '/images/testimonial-1.jpg' },
           { name: 'Michael Chen', text: 'Fitur drag and drop yang intuitif membuat pembuatan landing page menjadi sangat mudah.', role: 'Founder', company: 'Startup Inc', imageUrl: '/images/testimonial-2.jpg' },
         ]),
-      };
+      } as TestimonialsProps;
+
     case 'logos':
       return {
         title: 'Dipercaya Oleh',
@@ -130,7 +139,8 @@ const getDefaultProps = (type: BlockType): BlockProps => {
           { name: 'Company A', imageUrl: '/logo1.png' },
           { name: 'Company B', imageUrl: '/logo2.png' },
         ]),
-      };
+      } as LogosProps;
+
     case 'reviews':
       return {
         title: 'Ulasan Pengguna',
@@ -138,7 +148,8 @@ const getDefaultProps = (type: BlockType): BlockProps => {
           { name: 'User 1', rating: 5, text: 'Review 1' },
           { name: 'User 2', rating: 4, text: 'Review 2' },
         ]),
-      };
+      } as ReviewsProps;
+
     case 'pricing':
       return {
         title: 'Pilihan Paket',
@@ -147,20 +158,23 @@ const getDefaultProps = (type: BlockType): BlockProps => {
           { name: 'Basic', price: '99k', features: ['Fitur 1', 'Fitur 2'] },
           { name: 'Pro', price: '199k', features: ['Fitur 1', 'Fitur 2', 'Fitur 3'] },
         ]),
-      };
+      } as PricingProps;
+
     case 'cta':
       return {
         title: 'Mulai Sekarang',
         description: 'Bergabung dengan ribuan pengguna lainnya',
         buttonText: 'Daftar',
         buttonLink: '#',
-      };
+      } as CTAProps;
+
     case 'newsletter':
       return {
         title: 'Berlangganan Newsletter',
         description: 'Dapatkan update terbaru dari kami',
         buttonText: 'Berlangganan',
-      };
+      } as NewsletterProps;
+
     case 'contact':
       return {
         title: 'Hubungi Kami',
@@ -168,7 +182,8 @@ const getDefaultProps = (type: BlockType): BlockProps => {
         email: 'contact@example.com',
         phone: '+62123456789',
         address: 'Jl. Contoh No. 123',
-      };
+      } as ContactProps;
+
     case 'footer':
       return {
         logo: '/logo.png',
@@ -188,7 +203,8 @@ const getDefaultProps = (type: BlockType): BlockProps => {
           { platform: 'facebook', link: '#' },
           { platform: 'instagram', link: '#' },
         ]),
-      };
+      } as FooterProps;
+
     case 'simpleFooter':
       return {
         copyright: '© 2024 Company Name. All rights reserved.',
@@ -196,9 +212,10 @@ const getDefaultProps = (type: BlockType): BlockProps => {
           { label: 'Privacy', link: '#' },
           { label: 'Terms', link: '#' },
         ]),
-      };
+      } as SimpleFooterProps;
+
     default:
-      return {};
+      return {} as BlockProps;
   }
 };
 

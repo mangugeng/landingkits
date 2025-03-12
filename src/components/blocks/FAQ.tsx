@@ -10,7 +10,7 @@ interface FAQItem {
 interface FAQProps {
   sectionTitle?: string;
   sectionDescription?: string;
-  items?: FAQItem[];
+  items?: string;
   layout?: 'grid' | 'list';
   background?: 'white' | 'gray';
 }
@@ -51,11 +51,22 @@ const defaultItems: FAQItem[] = [
 const FAQ = ({
   sectionTitle = 'Frequently asked questions',
   sectionDescription = 'Find answers to common questions about our services.',
-  items = defaultItems,
+  items = JSON.stringify(defaultItems),
   layout = 'grid',
   background = 'white',
 }: FAQProps) => {
   const [openItems, setOpenItems] = useState<number[]>([]);
+  let parsedItems: FAQItem[] = [];
+
+  try {
+    parsedItems = JSON.parse(items);
+    if (!Array.isArray(parsedItems)) {
+      parsedItems = defaultItems;
+    }
+  } catch (error) {
+    console.error('Error parsing FAQ items:', error);
+    parsedItems = defaultItems;
+  }
 
   const toggleItem = (index: number) => {
     setOpenItems((current) =>
@@ -91,7 +102,7 @@ const FAQ = ({
               : 'space-y-8'
           }`}
         >
-          {items.map((item, index) => (
+          {parsedItems.map((item, index) => (
             <div
               key={index}
               className={`${

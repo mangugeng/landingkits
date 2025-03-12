@@ -1,3 +1,5 @@
+'use client';
+
 interface PricingTier {
   name: string;
   price: string;
@@ -11,7 +13,7 @@ interface PricingTier {
 interface PricingProps {
   sectionTitle?: string;
   sectionDescription?: string;
-  tiers?: PricingTier[];
+  tiers?: string;
   style?: 'light' | 'dark';
 }
 
@@ -62,13 +64,25 @@ const defaultTiers: PricingTier[] = [
 
 const Pricing = ({
   sectionTitle = 'Simple, transparent pricing',
-  sectionDescription = 'Choose the plan that&apos;s right for you',
-  tiers = defaultTiers,
+  sectionDescription = 'Choose the plan that\'s right for you',
+  tiers = JSON.stringify(defaultTiers),
   style = 'light',
 }: PricingProps) => {
   const bgColor = style === 'light' ? 'bg-white' : 'bg-gray-900';
   const textColor = style === 'light' ? 'text-gray-900' : 'text-white';
   const descriptionColor = style === 'light' ? 'text-gray-500' : 'text-gray-300';
+
+  let parsedTiers: PricingTier[] = [];
+
+  try {
+    parsedTiers = JSON.parse(tiers);
+    if (!Array.isArray(parsedTiers)) {
+      parsedTiers = defaultTiers;
+    }
+  } catch (error) {
+    console.error('Error parsing pricing tiers:', error);
+    parsedTiers = defaultTiers;
+  }
 
   return (
     <div className={`${bgColor} py-12 sm:py-16`}>
@@ -82,7 +96,7 @@ const Pricing = ({
           </p>
         </div>
         <div className="mt-12 space-y-4 sm:mt-16 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-6 lg:max-w-4xl lg:mx-auto xl:max-w-none xl:mx-0 xl:grid-cols-3">
-          {tiers.map((tier) => (
+          {parsedTiers.map((tier) => (
             <div
               key={tier.name}
               className={`${

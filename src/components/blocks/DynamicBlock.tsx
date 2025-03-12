@@ -1,24 +1,35 @@
 'use client';
 
-import { Block } from '@/store/editor';
+import { Block, BlockType, BlockProps } from '@/lib/types';
 import dynamic from 'next/dynamic';
 
 // Import block components dynamically
 const blocks = {
   hero: dynamic(() => import('./Hero')),
+  navbar: dynamic(() => import('./Navbar')),
+  header: dynamic(() => import('./Header')),
   features: dynamic(() => import('./Features')),
-  pricing: dynamic(() => import('./Pricing')),
+  content: dynamic(() => import('./Content')),
+  stats: dynamic(() => import('./Stats')),
+  team: dynamic(() => import('./Team')),
+  faq: dynamic(() => import('./FAQ')),
   testimonials: dynamic(() => import('./Testimonials')),
+  logos: dynamic(() => import('./Logos')),
+  reviews: dynamic(() => import('./Reviews')),
+  pricing: dynamic(() => import('./Pricing')),
+  cta: dynamic(() => import('./CTA')),
+  newsletter: dynamic(() => import('./Newsletter')),
   contact: dynamic(() => import('./Contact')),
-  // Add more block types as needed
-};
+  footer: dynamic(() => import('./Footer')),
+  simpleFooter: dynamic(() => import('./SimpleFooter')),
+} as Record<BlockType, React.ComponentType<BlockProps>>;
 
 interface DynamicBlockProps {
   block: Block;
 }
 
 export default function DynamicBlock({ block }: DynamicBlockProps) {
-  const BlockComponent = blocks[block.type as keyof typeof blocks];
+  const BlockComponent = blocks[block.type];
 
   if (!BlockComponent) {
     console.warn(`Block type "${block.type}" not found`);
