@@ -14,20 +14,30 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Start with loading true
 
   // Check session on mount
   useEffect(() => {
     const checkSession = async () => {
-      const supabase = createClientSupabaseClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        console.log('🔑 Existing session found, redirecting to dashboard...');
-        router.push('/dashboard');
+      try {
+        console.log('🔍 Checking session...');
+        const supabase = createClientSupabaseClient();
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session) {
+          console.log('🔑 Existing session found, redirecting to dashboard...');
+          // Use window.location for hard navigation
+          window.location.href = '/dashboard';
+          return;
+        }
+      } catch (error) {
+        console.error('❌ Error checking session:', error);
+      } finally {
+        setLoading(false);
       }
     };
     checkSession();
-  }, [router]);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,10 +69,21 @@ export default function LoginPage() {
     } catch (error: any) {
       console.error('❌ Login error:', error);
       setError(error.message || 'Email atau password salah');
-    } finally {
       setLoading(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+        <div className="sm:mx-auto sm:w-full sm:max-w-md">
+          <h2 className="mt-6 text-center text-xl font-medium text-gray-900">
+            Memeriksa sesi...
+          </h2>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
