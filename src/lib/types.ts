@@ -4,19 +4,47 @@ export type TemplateStatus = 'draft' | 'published';
 
 export interface Template {
   id: string;
+  user_id: string;
   name: string;
-  blocks: EditorBlock[];
-  status: TemplateStatus;
+  blocks: Block[];
   subdomain?: string;
   custom_domain?: string;
-  createdAt: string;
-  updatedAt: string;
-  userId: string;
-  isPublic?: boolean;
+  status: TemplateStatus;
+  is_public: boolean;
   description?: string;
-  thumbnail?: string;
+  created_at: string;
+  updated_at: string;
   views: number;
 }
+
+export interface Block {
+  id: string;
+  type: BlockType;
+  props: BlockProps;
+}
+
+export interface BlockProps {
+  [key: string]: any;
+}
+
+export type BlockType = 
+  | 'hero' 
+  | 'navbar'
+  | 'header'
+  | 'features' 
+  | 'content'
+  | 'stats'
+  | 'team'
+  | 'faq'
+  | 'testimonials'
+  | 'logos'
+  | 'reviews' 
+  | 'pricing'
+  | 'cta'
+  | 'newsletter'
+  | 'contact'
+  | 'footer'
+  | 'simpleFooter';
 
 export interface User {
   id: string;

@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase';
-import { Template, TemplateStatus } from './types';
+import { Template, TemplateStatus, Block } from './types';
 
 export async function getTemplates() {
   const supabase = createClient();
@@ -71,7 +71,7 @@ export async function saveTemplate(
   }
 }
 
-export async function getTemplate(id: string) {
+export async function getTemplate(id: string): Promise<Template | null> {
   const supabase = createClient();
   
   const { data, error } = await supabase

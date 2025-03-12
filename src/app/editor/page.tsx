@@ -14,6 +14,7 @@ import { useEditor } from '@/store/editor';
 import { useUser } from '@/lib/hooks/use-user';
 import { useToast } from '@/components/ui/use-toast';
 import { getTemplate } from '@/lib/templates';
+import { Template, Block } from '@/lib/types';
 
 function EditorContent() {
   const router = useRouter();
@@ -67,7 +68,7 @@ function EditorContent() {
         
         if (templateId) {
           const template = await getTemplate(templateId);
-          if (template) {
+          if (template?.blocks) {
             setBlocks(template.blocks);
           }
         } else {
@@ -75,8 +76,8 @@ function EditorContent() {
           const storedState = localStorage.getItem('editor-storage');
           if (storedState) {
             const { state } = JSON.parse(storedState);
-            if (state.blocks && state.blocks.length > 0) {
-              setBlocks(state.blocks);
+            if (state.blocks && Array.isArray(state.blocks)) {
+              setBlocks(state.blocks as Block[]);
             }
           }
         }
