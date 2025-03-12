@@ -34,21 +34,6 @@ const nextConfig = {
         contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
         unoptimized: process.env.NODE_ENV === 'development'
     },
-    async rewrites() {
-        return [
-            // Handle subdomain access - catch all paths
-            {
-                source: '/:path*',
-                has: [
-                    {
-                        type: 'host',
-                        value: '(?<subdomain>[^.]+).landingkits.com',
-                    },
-                ],
-                destination: '/_sites/:subdomain',
-            },
-        ];
-    },
     async headers() {
         return [
             {

@@ -4,6 +4,7 @@ import DynamicBlock from '@/components/blocks/DynamicBlock'
 import { Database } from '@/lib/database.types'
 import { Block } from '@/store/editor'
 import { notFound } from 'next/navigation'
+import { Metadata } from 'next'
 
 async function getTemplateBySubdomain(subdomain: string): Promise<Template | null> {
   console.log('🔍 Fetching template for subdomain:', subdomain);
@@ -54,22 +55,27 @@ async function getTemplateBySubdomain(subdomain: string): Promise<Template | nul
   }
 }
 
-export default async function SitePage({
-  params,
-  searchParams,
-}: {
-  params: { site: string }
-  searchParams: { [key: string]: string | string[] | undefined }
-}) {
-  console.log('🎯 Rendering site page for params:', params);
-  console.log('🔍 Search params:', searchParams);
+export async function generateMetadata({ params }: { params: { site: string } }): Promise<Metadata> {
+  const template = await getTemplateBySubdomain(params.site)
 
-  // Jika ada path yang tidak valid (seperti /docs, /about, dll), redirect ke halaman utama subdomain
-  if (Object.keys(searchParams).length > 0) {
-    console.log('❌ Invalid path detected, redirecting to main page');
-    return notFound();
+  if (!template) {
+    return {
+      title: 'Template Not Found',
+    }
   }
 
+  return {
+    title: template.name,
+    description: `Template for ${template.subdomain}.landingkits.com`,
+  }
+}
+
+export default async function SitePage({
+  params,
+}: {
+  params: { site: string }
+}) {
+  console.log('🎯 Rendering site page for params:', params);
   const template = await getTemplateBySubdomain(params.site)
 
   if (!template) {
