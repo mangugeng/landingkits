@@ -53,12 +53,40 @@ export default function DashboardClient() {
     router.push('/login');
   };
 
-  const handleCreateNew = () => {
-    router.push('/editor');
+  const handleCreateNew = async () => {
+    try {
+      // Verifikasi session sebelum navigasi
+      const supabase = createClientSupabaseClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        router.push('/login?redirectTo=/editor');
+        return;
+      }
+
+      router.push('/editor?noLoop=true');
+    } catch (error) {
+      console.error('Error navigating to editor:', error);
+      router.push('/login?redirectTo=/editor');
+    }
   };
 
-  const handleEditTemplate = (templateId: string) => {
-    router.push(`/editor?template=${templateId}`);
+  const handleEditTemplate = async (templateId: string) => {
+    try {
+      // Verifikasi session sebelum navigasi
+      const supabase = createClientSupabaseClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        router.push(`/login?redirectTo=/editor?template=${templateId}`);
+        return;
+      }
+
+      router.push(`/editor?template=${templateId}&noLoop=true`);
+    } catch (error) {
+      console.error('Error navigating to editor:', error);
+      router.push(`/login?redirectTo=/editor?template=${templateId}`);
+    }
   };
 
   const handleDeleteTemplate = async (templateId: string) => {
@@ -66,6 +94,14 @@ export default function DashboardClient() {
 
     try {
       const supabase = createClientSupabaseClient();
+      
+      // Verifikasi session sebelum delete
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        router.push('/login?noLoop=true');
+        return;
+      }
+
       const { error } = await supabase
         .from('templates')
         .delete()

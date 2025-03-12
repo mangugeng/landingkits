@@ -1,6 +1,8 @@
 'use client';
 
 import { DragEndEvent } from '@dnd-kit/core';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useEditorStore } from '@/store/editor';
 import Sidebar from '@/components/editor/Sidebar';
 import Canvas from '@/components/editor/Canvas';
@@ -8,12 +10,37 @@ import PropertyPanel from '@/components/editor/PropertyPanel';
 import Toolbar from '@/components/editor/Toolbar';
 import DndProvider from '@/components/editor/DndProvider';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { createClientSupabaseClient } from '@/lib/supabase';
 
 export default function EditorPage() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
   const addBlock = useEditorStore((state) => state.addBlock);
   const reorderBlocks = useEditorStore((state) => state.reorderBlocks);
   const blocks = useEditorStore((state) => state.blocks);
   const previewMode = useEditorStore((state) => state.previewMode);
+
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const supabase = createClientSupabaseClient();
+        const { data: { session } } = await supabase.auth.getSession();
+
+        if (!session) {
+          console.log('No session found in editor, redirecting to login');
+          router.push('/login?redirectTo=/editor&noLoop=true');
+          return;
+        }
+
+        setLoading(false);
+      } catch (error) {
+        console.error('Error checking session in editor:', error);
+        router.push('/login?redirectTo=/editor&noLoop=true');
+      }
+    };
+
+    checkSession();
+  }, [router]);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -37,6 +64,18 @@ export default function EditorPage() {
       }
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-medium text-gray-900">
+            Memuat editor...
+          </h2>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <DndProvider onDragEnd={handleDragEnd}>
