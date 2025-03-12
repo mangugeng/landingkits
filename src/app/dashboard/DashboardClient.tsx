@@ -215,17 +215,17 @@ export default function DashboardClient() {
                       {template.name}
                     </h3>
                     <p className="mt-1 text-sm text-gray-500">
-                      Dibuat: {new Date(template.created_at).toLocaleDateString()}
+                      Dibuat: {new Date(template.createdAt).toLocaleDateString()}
                     </p>
                     <div className="mt-4 flex space-x-3">
                       <button
-                        onClick={() => handleEditTemplate(template.id)}
+                        onClick={() => template.id && handleEditTemplate(template.id)}
                         className="bg-blue-50 text-blue-700 px-3 py-1 rounded-md text-sm hover:bg-blue-100"
                       >
                         Edit
                       </button>
                       <button
-                        onClick={() => handleDeleteTemplate(template.id)}
+                        onClick={() => template.id && handleDeleteTemplate(template.id)}
                         className="bg-red-50 text-red-700 px-3 py-1 rounded-md text-sm hover:bg-red-100"
                       >
                         Hapus

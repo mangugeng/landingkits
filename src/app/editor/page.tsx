@@ -1,7 +1,7 @@
 'use client';
 
 import { DragEndEvent } from '@dnd-kit/core';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase';
 import Sidebar from '@/components/editor/Sidebar';
@@ -10,16 +10,20 @@ import PropertyPanel from '@/components/editor/PropertyPanel';
 import Toolbar from '@/components/editor/Toolbar';
 import DndProvider from '@/components/editor/DndProvider';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { useEditorStore } from '@/store/editor';
+import { useEditor } from '@/store/editor';
+import { useUser } from '@/lib/hooks/use-user';
+import { useToast } from '@/components/ui/use-toast';
 
-export default function EditorPage() {
+function EditorContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { user, loading } = useUser();
+  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
-  const addBlock = useEditorStore((state) => state.addBlock);
-  const reorderBlocks = useEditorStore((state) => state.reorderBlocks);
-  const blocks = useEditorStore((state) => state.blocks);
-  const previewMode = useEditorStore((state) => state.previewMode);
+  const addBlock = useEditor((state) => state.addBlock);
+  const reorderBlocks = useEditor((state) => state.reorderBlocks);
+  const blocks = useEditor((state) => state.blocks);
+  const previewMode = useEditor((state) => state.previewMode);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -42,6 +46,17 @@ export default function EditorPage() {
 
     checkSession();
   }, [router]);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      toast({
+        title: 'Error',
+        description: 'You must be logged in to access the editor',
+        variant: 'destructive',
+      });
+      router.push('/login');
+    }
+  }, [user, loading, router, toast]);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -66,7 +81,7 @@ export default function EditorPage() {
     }
   };
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -77,8 +92,12 @@ export default function EditorPage() {
     );
   }
 
+  if (!user) {
+    return null;
+  }
+
   return (
-    <DndProvider onDragEnd={handleDragEnd}>
+    <DndProvider>
       <Toolbar />
       <div className="flex h-screen pt-14">
         {!previewMode && <Sidebar />}
@@ -91,5 +110,20 @@ export default function EditorPage() {
         {!previewMode && <PropertyPanel />}
       </div>
     </DndProvider>
+  );
+}
+
+export default function EditorPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
+          <p className="mt-4 text-gray-600">Memuat editor...</p>
+        </div>
+      </div>
+    }>
+      <EditorContent />
+    </Suspense>
   );
 } 

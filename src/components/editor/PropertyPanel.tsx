@@ -1,7 +1,14 @@
 'use client';
 
 import React from 'react';
-import { useEditorStore, Block } from '@/store/editor';
+import { useEditor } from '@/store/editor';
+import { Block } from '@/store/editor';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import { cn } from '@/lib/utils';
 
 interface PropertyConfig {
   type: 'text' | 'color' | 'image' | 'richtext' | 'select';
@@ -197,87 +204,74 @@ const blockProperties: Record<Block['type'], PropertyConfig[]> = {
 };
 
 const PropertyPanel: React.FC = () => {
-  const selectedBlockId = useEditorStore((state) => state.selectedBlockId);
-  const blocks = useEditorStore((state) => state.blocks);
-  const updateBlockProps = useEditorStore((state) => state.updateBlockProps);
-  const removeBlock = useEditorStore((state) => state.removeBlock);
-
-  const selectedBlock = blocks.find((block) => block.id === selectedBlockId);
+  const selectedBlock = useEditor((state) => state.selectedBlock);
+  const updateBlock = useEditor((state) => state.updateBlock);
+  const removeBlock = useEditor((state) => state.removeBlock);
 
   if (!selectedBlock) {
-    return (
-      <div className="w-80 bg-gray-50 border-l border-gray-200 p-4">
-        <p className="text-gray-500 text-center">Pilih blok untuk mengedit properti</p>
-      </div>
-    );
+    return null;
   }
 
-  const properties = blockProperties[selectedBlock.type] || [];
-
-  const handlePropertyChange = (key: string, value: string) => {
-    updateBlockProps(selectedBlock.id, { [key]: value });
+  const handleChange = (key: string, value: any) => {
+    updateBlock(selectedBlock.id, {
+      ...selectedBlock,
+      props: {
+        ...selectedBlock.props,
+        [key]: value,
+      },
+    });
   };
 
   return (
-    <div className="w-80 bg-gray-50 border-l border-gray-200 p-4 overflow-y-auto">
-      <div className="flex justify-between items-center mb-6">
-        <h3 className="text-lg font-semibold">Edit {selectedBlock.type}</h3>
-        <button
+    <div className="w-[300px] border-l bg-white p-4 space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-medium">Properties</h2>
+        <Button
+          variant="destructive"
+          size="sm"
           onClick={() => removeBlock(selectedBlock.id)}
-          className="text-red-500 hover:text-red-700"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              fillRule="evenodd"
-              d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-              clipRule="evenodd"
-            />
-          </svg>
-        </button>
+          Delete
+        </Button>
       </div>
-
       <div className="space-y-4">
-        {properties.map((prop) => (
-          <div key={prop.key}>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {prop.label}
-            </label>
-            {prop.type === 'select' && prop.options ? (
-              <select
-                value={String(selectedBlock.props[prop.key] || '')}
-                onChange={(e) => handlePropertyChange(prop.key, e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="">Pilih opsi</option>
-                {prop.options.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            ) : prop.type === 'color' ? (
-              <input
-                type="color"
-                value={String(selectedBlock.props[prop.key] || '#000000')}
-                onChange={(e) => handlePropertyChange(prop.key, e.target.value)}
-                className="w-full h-10 p-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            ) : (
-              <input
-                type={prop.type === 'richtext' ? 'text' : prop.type}
-                value={String(selectedBlock.props[prop.key] || '')}
-                onChange={(e) => handlePropertyChange(prop.key, e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                placeholder={`Masukkan ${prop.label.toLowerCase()}`}
-              />
-            )}
-          </div>
-        ))}
+        {Object.entries(selectedBlock.props).map(([key, value]) => {
+          if (typeof value === 'boolean') {
+            return (
+              <div key={key} className="flex items-center justify-between">
+                <Label htmlFor={key} className="capitalize">
+                  {key}
+                </Label>
+                <Switch
+                  id={key}
+                  checked={value}
+                  onCheckedChange={(checked) => handleChange(key, checked)}
+                />
+              </div>
+            );
+          }
+
+          if (typeof value === 'string') {
+            const isLongText = value.length > 100;
+            const InputComponent = isLongText ? Textarea : Input;
+
+            return (
+              <div key={key} className="space-y-2">
+                <Label htmlFor={key} className="capitalize">
+                  {key}
+                </Label>
+                <InputComponent
+                  id={key}
+                  value={value}
+                  onChange={(e) => handleChange(key, e.target.value)}
+                  className={cn(isLongText && 'min-h-[100px]')}
+                />
+              </div>
+            );
+          }
+
+          return null;
+        })}
       </div>
     </div>
   );

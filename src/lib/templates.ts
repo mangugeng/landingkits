@@ -1,42 +1,61 @@
 import { createClient } from '@/lib/supabase';
 import { Template, TemplateStatus } from './types';
 
-export async function saveTemplate(template: Partial<Template>) {
+export async function getTemplates() {
   const supabase = createClient();
-  
-  const { data: session } = await supabase.auth.getSession();
-  if (!session?.session?.user) {
-    throw new Error('Unauthorized');
-  }
 
-  const now = new Date().toISOString();
-  const templateData = {
-    ...template,
-    userId: session.session.user.id,
-    updatedAt: now,
-    createdAt: template.id ? undefined : now,
-    views: template.views || 0
-  };
+  const { data, error } = await supabase
+    .from('templates')
+    .select('*')
+    .order('created_at', { ascending: false });
 
-  if (template.id) {
+  if (error) throw error;
+  return data;
+}
+
+export async function saveTemplate(
+  name: string,
+  blocks: any[],
+  userId: string,
+  subdomain?: string,
+  id?: string
+) {
+  try {
+    const supabase = createClient();
+
+    if (id) {
+      const { data, error } = await supabase
+        .from('templates')
+        .update({
+          name,
+          blocks,
+          subdomain,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    }
+
     const { data, error } = await supabase
       .from('templates')
-      .update(templateData)
-      .eq('id', template.id)
+      .insert({
+        name,
+        blocks,
+        subdomain,
+        user_id: userId,
+      })
       .select()
       .single();
 
     if (error) throw error;
     return data;
-  } else {
-    const { data, error } = await supabase
-      .from('templates')
-      .insert(templateData)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data;
+  } catch (error) {
+    console.error('Error saving template:', error);
+    throw error;
   }
 }
 
@@ -64,11 +83,10 @@ export async function updateTemplateStatus(id: string, status: TemplateStatus) {
   const { data, error } = await supabase
     .from('templates')
     .update({ 
-      status,
-      updatedAt: new Date().toISOString()
+      updated_at: new Date().toISOString()
     })
     .eq('id', id)
-    .eq('userId', session.session.user.id)
+    .eq('user_id', session.session.user.id)
     .select()
     .single();
 
@@ -101,29 +119,14 @@ export async function updateTemplateDomain(
     }
   }
 
-  // Check if custom domain is available
-  if (customDomain) {
-    const { data: existing } = await supabase
-      .from('templates')
-      .select('id')
-      .eq('customDomain', customDomain)
-      .neq('id', id)
-      .single();
-
-    if (existing) {
-      throw new Error('Domain sudah digunakan');
-    }
-  }
-
   const { data, error } = await supabase
     .from('templates')
     .update({ 
       subdomain,
-      customDomain,
-      updatedAt: new Date().toISOString()
+      updated_at: new Date().toISOString()
     })
     .eq('id', id)
-    .eq('userId', session.session.user.id)
+    .eq('user_id', session.session.user.id)
     .select()
     .single();
 
@@ -137,8 +140,7 @@ export async function incrementTemplateViews(id: string) {
   const { data, error } = await supabase
     .from('templates')
     .update({ 
-      views: supabase.rpc('increment_views', { row_id: id }),
-      updatedAt: new Date().toISOString()
+      updated_at: new Date().toISOString()
     })
     .eq('id', id)
     .select()

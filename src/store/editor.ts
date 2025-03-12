@@ -221,46 +221,39 @@ const getDefaultProps = (type: BlockType): BlockProps => {
 
 interface EditorState {
   blocks: Block[];
-  selectedBlockId: string | null;
+  selectedBlock: Block | null;
   previewMode: boolean;
   templates: Template[];
   setBlocks: (blocks: Block[]) => void;
-  addBlock: (type: string) => void;
+  addBlock: (block: Block) => void;
   removeBlock: (id: string) => void;
   reorderBlocks: (oldIndex: number, newIndex: number) => void;
-  updateBlockProps: (id: string, props: any) => void;
+  updateBlock: (id: string, props: Record<string, any>) => void;
   setSelectedBlock: (id: string | null) => void;
   togglePreviewMode: () => void;
   saveTemplate: (template: Template) => void;
   loadTemplate: (name: string) => void;
   deleteTemplate: (name: string) => void;
   clearCanvas: () => void;
+  selectBlock: (block: Block | null) => void;
+  moveBlock: (fromIndex: number, toIndex: number) => void;
 }
 
-export const useEditorStore = create<EditorState>((set) => ({
+const useEditor = create<EditorState>((set) => ({
   blocks: [],
-  selectedBlockId: null,
+  selectedBlock: null,
   previewMode: false,
   templates: [],
 
   setBlocks: (blocks) => set({ blocks }),
 
-  addBlock: (type) => {
-    const newBlock: Block = {
-      id: nanoid(),
-      type: type as BlockType,
-      props: getDefaultProps(type as BlockType),
-    };
-
-    set((state) => ({
-      blocks: [...state.blocks, newBlock],
-    }));
-  },
+  addBlock: (block) =>
+    set((state) => ({ blocks: [...state.blocks, block] })),
 
   removeBlock: (id) =>
     set((state) => ({
       blocks: state.blocks.filter((block) => block.id !== id),
-      selectedBlockId: state.selectedBlockId === id ? null : state.selectedBlockId,
+      selectedBlock: state.selectedBlock?.id === id ? null : state.selectedBlock,
     })),
 
   reorderBlocks: (oldIndex, newIndex) =>
@@ -271,14 +264,17 @@ export const useEditorStore = create<EditorState>((set) => ({
       return { blocks };
     }),
 
-  updateBlockProps: (id, props) =>
+  updateBlock: (id, props) =>
     set((state) => ({
       blocks: state.blocks.map((block) =>
         block.id === id ? { ...block, props: { ...block.props, ...props } } : block
       ),
     })),
 
-  setSelectedBlock: (id) => set({ selectedBlockId: id }),
+  setSelectedBlock: (id: string | null) => 
+    set((state) => ({ 
+      selectedBlock: id ? state.blocks.find(block => block.id === id) || null : null 
+    })),
 
   togglePreviewMode: () => set((state) => ({ previewMode: !state.previewMode })),
 
@@ -310,7 +306,7 @@ export const useEditorStore = create<EditorState>((set) => ({
 
       return {
         blocks: newBlocks,
-        selectedBlockId: null,
+        selectedBlock: null,
       };
     }),
 
@@ -319,5 +315,17 @@ export const useEditorStore = create<EditorState>((set) => ({
       templates: state.templates.filter((t) => t.name !== name),
     })),
 
-  clearCanvas: () => set({ blocks: [], selectedBlockId: null }),
-})); 
+  clearCanvas: () => set({ blocks: [], selectedBlock: null }),
+
+  selectBlock: (block) => set({ selectedBlock: block }),
+
+  moveBlock: (fromIndex, toIndex) =>
+    set((state) => {
+      const blocks = [...state.blocks];
+      const [removed] = blocks.splice(fromIndex, 1);
+      blocks.splice(toIndex, 0, removed);
+      return { blocks };
+    }),
+}));
+
+export { useEditor }; 

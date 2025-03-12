@@ -1,77 +1,92 @@
 'use client';
 
-import { useEditorStore } from '@/store/editor';
+import { useEffect, useState } from 'react'
+import { useEditor } from '@/store/editor'
+import { useToast } from '@/components/ui/use-toast'
+import { getTemplates } from '@/lib/templates'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 
 interface LoadTemplateDialogProps {
-  onClose: () => void;
+  open: boolean
+  onOpenChange: (open: boolean) => void
 }
 
-const LoadTemplateDialog = ({ onClose }: LoadTemplateDialogProps) => {
-  const templates = useEditorStore((state) => state.templates);
-  const loadTemplate = useEditorStore((state) => state.loadTemplate);
-  const deleteTemplate = useEditorStore((state) => state.deleteTemplate);
+export default function LoadTemplateDialog({
+  open,
+  onOpenChange,
+}: LoadTemplateDialogProps) {
+  const [templates, setTemplates] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const { toast } = useToast()
+  const setBlocks = useEditor((state) => state.setBlocks)
 
-  const handleLoad = (templateName: string) => {
-    loadTemplate(templateName);
-    onClose();
-  };
-
-  const handleDelete = (templateName: string) => {
-    if (confirm(`Apakah Anda yakin ingin menghapus template "${templateName}"?`)) {
-      deleteTemplate(templateName);
+  useEffect(() => {
+    async function loadTemplates() {
+      try {
+        const data = await getTemplates()
+        setTemplates(data)
+      } catch (error) {
+        console.error('Error loading templates:', error)
+        toast({
+          title: 'Error',
+          description: 'Failed to load templates',
+          variant: 'destructive',
+        })
+      } finally {
+        setLoading(false)
+      }
     }
-  };
+
+    if (open) {
+      loadTemplates()
+    }
+  }, [open, toast])
+
+  const handleLoadTemplate = (template: any) => {
+    setBlocks(template.blocks)
+    onOpenChange(false)
+    toast({
+      title: 'Success',
+      description: 'Template loaded successfully',
+    })
+  }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-[480px] max-h-[80vh] overflow-y-auto">
-        <h2 className="text-xl font-bold mb-4">Muat Template</h2>
-        
-        {templates.length === 0 ? (
-          <p className="text-gray-500">Belum ada template tersimpan</p>
-        ) : (
-          <div className="space-y-4">
-            {templates.map((template) => (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Load Template</DialogTitle>
+          <DialogDescription>
+            Choose a template to load into the editor
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
+          {loading ? (
+            <div>Loading templates...</div>
+          ) : templates.length === 0 ? (
+            <div>No templates found</div>
+          ) : (
+            templates.map((template) => (
               <div
-                key={template.name}
-                className="p-4 border border-gray-200 rounded-lg hover:border-blue-500 transition-colors"
+                key={template.id}
+                className="p-4 border border-gray-200 rounded-md hover:bg-gray-50 cursor-pointer"
+                onClick={() => handleLoadTemplate(template)}
               >
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="font-medium">{template.name}</h3>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => handleLoad(template.name)}
-                      className="text-sm text-blue-600 hover:text-blue-700"
-                    >
-                      Muat
-                    </button>
-                    <button
-                      onClick={() => handleDelete(template.name)}
-                      className="text-sm text-red-600 hover:text-red-700"
-                    >
-                      Hapus
-                    </button>
-                  </div>
-                </div>
+                <h3 className="font-medium">{template.name}</h3>
                 <p className="text-sm text-gray-500">
-                  Dibuat: {new Date(template.createdAt).toLocaleDateString()}
+                  Created at: {new Date(template.created_at).toLocaleString()}
                 </p>
               </div>
-            ))}
-          </div>
-        )}
-
-        <div className="mt-6 flex justify-end">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
-          >
-            Tutup
-          </button>
+            ))
+          )}
         </div>
-      </div>
-    </div>
-  );
-};
-
-export default LoadTemplateDialog; 
+      </DialogContent>
+    </Dialog>
+  )
+} 

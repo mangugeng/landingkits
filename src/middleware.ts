@@ -8,19 +8,35 @@ export async function middleware(req: NextRequest) {
   // Clone the request headers
   const requestHeaders = new Headers(req.headers);
   
-  // Create a new response
-  const res = NextResponse.next({
-    request: {
-      headers: requestHeaders,
-    },
-  });
-
   try {
+    // Handle subdomains
+    const url = req.nextUrl;
+    const hostname = req.headers.get('host') || '';
+    const subdomain = hostname.split('.')[0];
+    const isSubdomain = hostname.includes('landingkits.com') && subdomain !== 'www' && subdomain !== 'landingkits';
+
+    // If it's a subdomain request, rewrite to the template page
+    if (isSubdomain) {
+      console.log('🌐 Subdomain detected:', subdomain);
+      const templateUrl = new URL(`/_sites/${subdomain}${url.pathname}`, url);
+      return NextResponse.rewrite(templateUrl);
+    }
+
     // Jika ada parameter noLoop, skip middleware
     if (req.nextUrl.searchParams.has('noLoop')) {
       console.log('🔄 Skipping middleware due to noLoop parameter');
-      return res;
+      return NextResponse.next({
+        request: {
+          headers: requestHeaders,
+        },
+      });
     }
+
+    const res = NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
 
     const supabase = createMiddlewareClient({ req, res });
     const {
@@ -63,5 +79,14 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/editor/:path*', '/login', '/register'],
+  matcher: [
+    // Handle specific routes
+    '/dashboard/:path*',
+    '/editor/:path*',
+    '/login',
+    '/register',
+    // Handle subdomains
+    '/',
+    '/_sites/:path*'
+  ]
 }; 

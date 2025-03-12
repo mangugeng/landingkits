@@ -11,29 +11,30 @@ import {
   DragOverlay,
   DragStartEvent,
   defaultDropAnimationSideEffects,
+  DragOverEvent,
 } from '@dnd-kit/core';
 import { useState } from 'react';
-import { useEditorStore } from '@/store/editor';
+import { useEditor } from '@/store/editor';
 
 interface Props {
   children: ReactNode;
-  onDragEnd?: (event: DragEndEvent) => void;
 }
 
-const DndProvider = ({ children, onDragEnd }: Props) => {
+const DndProvider = ({ children }: Props) => {
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [draggedType, setDraggedType] = useState<string | null>(null);
-  const previewMode = useEditorStore((state) => state.previewMode);
+  const addBlock = useEditor((state) => state.addBlock);
+  const moveBlock = useEditor((state) => state.moveBlock);
+  const blocks = useEditor((state) => state.blocks);
 
   const mouseSensor = useSensor(MouseSensor, {
     activationConstraint: {
-      distance: 5,
+      distance: 10,
     },
   });
 
   const touchSensor = useSensor(TouchSensor, {
     activationConstraint: {
-      delay: 100,
+      delay: 300,
       tolerance: 5,
     },
   });
@@ -41,50 +42,51 @@ const DndProvider = ({ children, onDragEnd }: Props) => {
   const sensors = useSensors(mouseSensor, touchSensor);
 
   const handleDragStart = (event: DragStartEvent) => {
-    setActiveId(event.active.id as string);
-    if (event.active.data.current?.isTemplate) {
-      setDraggedType(event.active.data.current.type);
-    }
+    const { active } = event;
+    setActiveId(active.id as string);
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && over.id === 'canvas') {
+      const isTemplate = active.data.current?.isTemplate;
+      if (isTemplate) {
+        const template = active.data.current?.template;
+        addBlock(template);
+      }
+    }
+
     setActiveId(null);
-    setDraggedType(null);
-    onDragEnd?.(event);
   };
 
-  if (previewMode) {
-    return <>{children}</>;
-  }
+  const handleDragOver = (event: DragOverEvent) => {
+    const { active, over } = event;
+
+    if (!over) return;
+
+    const isTemplate = active.data.current?.isTemplate;
+    if (isTemplate) return;
+
+    const overId = over.id as string;
+    if (overId === activeId) return;
+
+    const oldIndex = blocks.findIndex((block) => block.id === activeId);
+    const newIndex = blocks.findIndex((block) => block.id === overId);
+
+    if (oldIndex !== -1 && newIndex !== -1) {
+      moveBlock(oldIndex, newIndex);
+    }
+  };
 
   return (
-    <DndContext 
-      sensors={sensors} 
+    <DndContext
+      sensors={sensors}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
+      onDragOver={handleDragOver}
     >
       {children}
-      <DragOverlay
-        dropAnimation={{
-          duration: 150,
-          sideEffects: defaultDropAnimationSideEffects({
-            styles: {
-              active: {
-                opacity: '0.4',
-              },
-            },
-          }),
-        }}
-        modifiers={[]}
-      >
-        {activeId && draggedType && (
-          <div className="p-3 bg-white rounded-lg shadow-lg border-2 border-blue-500 w-64 pointer-events-none">
-            <div className="text-sm font-medium text-gray-700">
-              {draggedType.charAt(0).toUpperCase() + draggedType.slice(1)}
-            </div>
-          </div>
-        )}
-      </DragOverlay>
     </DndContext>
   );
 };

@@ -1,11 +1,11 @@
-import { Block } from '@/store/editor';
+import { Block as EditorBlock } from '@/store/editor';
 
 export type TemplateStatus = 'draft' | 'published';
 
 export interface Template {
-  id?: string;
+  id: string;
   name: string;
-  blocks: Block[];
+  blocks: EditorBlock[];
   status: TemplateStatus;
   subdomain?: string;
   customDomain?: string;
@@ -16,4 +16,17 @@ export interface Template {
   description?: string;
   thumbnail?: string;
   views: number;
+}
+
+export interface User {
+  id: string;
+  email?: string;
+  user_metadata?: {
+    [key: string]: any;
+  };
+  app_metadata?: {
+    [key: string]: any;
+  };
+  created_at?: string;
+  updated_at?: string;
 } 

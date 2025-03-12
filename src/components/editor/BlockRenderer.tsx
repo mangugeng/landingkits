@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { useEditorStore, Block } from '@/store/editor';
+import { Block, useEditor } from '@/store/editor';
 import dynamic from 'next/dynamic';
 import type { CSSProperties } from 'react';
 
@@ -33,10 +33,10 @@ interface BlockRendererProps {
 
 const BlockRenderer = ({ block, isPreview = false }: BlockRendererProps) => {
   const [isHovered, setIsHovered] = useState(false);
-  const selectedBlockId = useEditorStore((state) => state.selectedBlockId);
-  const setSelectedBlock = useEditorStore((state) => state.setSelectedBlock);
-  const removeBlock = useEditorStore((state) => state.removeBlock);
-  const previewMode = useEditorStore((state) => state.previewMode);
+  const selectBlock = useEditor((state) => state.selectBlock);
+  const selectedBlock = useEditor((state) => state.selectedBlock);
+  const removeBlock = useEditor((state) => state.removeBlock);
+  const previewMode = useEditor((state) => state.previewMode);
 
   const {
     attributes,
@@ -58,11 +58,11 @@ const BlockRenderer = ({ block, isPreview = false }: BlockRendererProps) => {
     zIndex: isDragging ? 999 : undefined,
   };
 
-  const isSelected = selectedBlockId === block.id;
+  const isSelected = selectedBlock?.id === block.id;
 
   const handleSelect = () => {
     if (!previewMode) {
-      setSelectedBlock(block.id);
+      selectBlock(block);
     }
   };
 

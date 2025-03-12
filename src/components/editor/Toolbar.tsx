@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useEditorStore } from '@/store/editor';
+import { useEditor } from '@/store/editor';
+import { Button } from '@/components/ui/button';
 import SaveTemplateDialog from './SaveTemplateDialog';
 import LoadTemplateDialog from './LoadTemplateDialog';
 
@@ -16,10 +17,10 @@ const Toolbar = ({ onSave, onExport }: ToolbarProps) => {
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
   const [isLoadDialogOpen, setIsLoadDialogOpen] = useState(false);
   
-  const blocks = useEditorStore((state) => state.blocks);
-  const previewMode = useEditorStore((state) => state.previewMode);
-  const togglePreviewMode = useEditorStore((state) => state.togglePreviewMode);
-  const clearCanvas = useEditorStore((state) => state.clearCanvas);
+  const blocks = useEditor((state) => state.blocks);
+  const previewMode = useEditor((state) => state.previewMode);
+  const togglePreviewMode = useEditor((state) => state.togglePreviewMode);
+  const clearCanvas = useEditor((state) => state.clearCanvas);
 
   const handlePreviewToggle = () => {
     togglePreviewMode();
@@ -72,7 +73,7 @@ const Toolbar = ({ onSave, onExport }: ToolbarProps) => {
             onClick={handleLoad}
             className="px-3 py-1.5 bg-gray-100 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-200"
           >
-            Muat Template
+            Load Template
           </button>
 
           <button
@@ -97,14 +98,15 @@ const Toolbar = ({ onSave, onExport }: ToolbarProps) => {
 
       {isSaveDialogOpen && (
         <SaveTemplateDialog
-          blocks={blocks}
-          onClose={() => setIsSaveDialogOpen(false)}
+          open={isSaveDialogOpen}
+          onOpenChange={(open) => setIsSaveDialogOpen(open)}
         />
       )}
 
       {isLoadDialogOpen && (
         <LoadTemplateDialog
-          onClose={() => setIsLoadDialogOpen(false)}
+          open={isLoadDialogOpen}
+          onOpenChange={(open) => setIsLoadDialogOpen(open)}
         />
       )}
     </>

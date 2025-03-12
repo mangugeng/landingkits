@@ -103,11 +103,10 @@ const Team = ({
           )}
         </div>
         <ul
-          className={`mx-auto mt-20 grid max-w-2xl gap-x-8 gap-y-16 sm:grid-cols-2 lg:mx-0 lg:max-w-none ${
-            layout === 'grid'
+          className={`mx-auto mt-20 grid max-w-2xl gap-x-8 gap-y-16 sm:grid-cols-2 lg:mx-0 lg:max-w-none ${layout === 'grid'
               ? 'lg:grid-cols-4'
               : 'lg:grid-cols-3 xl:grid-cols-4'
-          }`}
+            }`}
         >
           {parsedMembers.map((member) => (
             <li key={member.name}>
