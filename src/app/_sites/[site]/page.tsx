@@ -1,8 +1,7 @@
-import { Template, TemplateStatus } from '@/lib/types'
+import { Template, TemplateStatus, Block } from '@/lib/types'
 import { createClient } from '@/lib/supabase'
 import DynamicBlock from '@/components/blocks/DynamicBlock'
 import { Database } from '@/lib/database.types'
-import { Block } from '@/store/editor'
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 

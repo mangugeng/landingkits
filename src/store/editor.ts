@@ -3,6 +3,8 @@ import { persist } from 'zustand/middleware';
 import { nanoid } from 'nanoid';
 import { Block, BlockType, BlockProps } from '@/lib/types';
 
+export type { Block, BlockType, BlockProps };
+
 export interface EditorTemplate {
   name: string;
   blocks: Block[];
