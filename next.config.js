@@ -35,18 +35,29 @@ const nextConfig = {
         unoptimized: process.env.NODE_ENV === 'development'
     },
     async rewrites() {
-        return [
-            {
-                source: '/:path*',
-                has: [
-                    {
-                        type: 'host',
-                        value: '(?<subdomain>[^.]+).landingkits.com',
-                    },
-                ],
-                destination: '/_sites/:subdomain/:path*',
-            },
-        ];
+        return {
+            beforeFiles: [
+                {
+                    source: '/:path*',
+                    has: [
+                        {
+                            type: 'host',
+                            value: '(?<subdomain>[^.]+).landingkits.com',
+                        },
+                    ],
+                    destination: '/_sites/:subdomain/:path*',
+                },
+                // Explicit rewrite for direct _sites access
+                {
+                    source: '/_sites/:subdomain',
+                    destination: '/_sites/:subdomain',
+                },
+                {
+                    source: '/_sites/:subdomain/:path*',
+                    destination: '/_sites/:subdomain/:path*',
+                }
+            ]
+        };
     },
     async headers() {
         return [

@@ -1,29 +1,6 @@
 import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs';
-import { createClient } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-
-// Fungsi untuk mengecek apakah subdomain valid
-async function isValidSubdomain(subdomain: string): Promise<boolean> {
-  try {
-    const supabase = createClient();
-    const { data, error } = await supabase
-      .from('templates')
-      .select('id, status')
-      .eq('subdomain', subdomain)
-      .single();
-
-    if (error) {
-      console.error('Error checking subdomain:', error);
-      return false;
-    }
-
-    return data && data.status === 'published';
-  } catch (error) {
-    console.error('Error in isValidSubdomain:', error);
-    return false;
-  }
-}
 
 export async function middleware(req: NextRequest) {
   console.log('🔒 Middleware running for path:', req.nextUrl.pathname);
@@ -32,38 +9,6 @@ export async function middleware(req: NextRequest) {
   const requestHeaders = new Headers(req.headers);
   
   try {
-    // Handle subdomains
-    const url = req.nextUrl;
-    const hostname = req.headers.get('host') || '';
-    const subdomain = hostname.split('.')[0];
-    const isSubdomainRequest = hostname.includes('landingkits.com') && subdomain !== 'www' && subdomain !== 'landingkits';
-
-    // Jika request ke subdomain
-    if (isSubdomainRequest) {
-      console.log('🌐 Subdomain detected:', subdomain);
-
-      // Jika sudah di path _sites, skip
-      if (url.pathname.startsWith('/_sites')) {
-        return NextResponse.next({
-          request: {
-            headers: requestHeaders,
-          },
-        });
-      }
-
-      // Cek apakah subdomain valid (ada di database dan published)
-      const isValid = await isValidSubdomain(subdomain);
-      if (!isValid) {
-        console.log('❌ Invalid subdomain:', subdomain);
-        return NextResponse.redirect(new URL('https://landingkits.com'));
-      }
-
-      // Rewrite ke halaman template
-      const templateUrl = new URL(`/_sites/${subdomain}`, req.url).toString();
-      console.log('🔄 Rewriting to:', templateUrl);
-      return NextResponse.rewrite(new URL(templateUrl));
-    }
-
     // Jika ada parameter noLoop, skip middleware
     if (req.nextUrl.searchParams.has('noLoop')) {
       console.log('🔄 Skipping middleware due to noLoop parameter');
