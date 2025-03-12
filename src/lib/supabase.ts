@@ -1,44 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
-import { cookies } from 'next/headers';
 
 const SITE_URL = 'https://landingkits.com';
 const REDIRECT_URL = `${SITE_URL}/auth/callback`;
 
 let clientInstance: ReturnType<typeof createClient> | null = null;
-
-export const createServerSupabaseClient = () => {
-  console.log('🔧 Creating server Supabase client');
-  
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  if (!supabaseUrl || !supabaseKey) {
-    console.error('❌ Missing Supabase environment variables');
-    throw new Error('Missing Supabase environment variables');
-  }
-
-  const cookieStore = cookies();
-
-  return createClient(supabaseUrl, supabaseKey, {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true,
-      flowType: 'pkce',
-      storage: {
-        getItem: (key) => {
-          return cookieStore.get(key)?.value ?? null;
-        },
-        setItem: (key, value) => {
-          cookieStore.set(key, value);
-        },
-        removeItem: (key) => {
-          cookieStore.delete(key);
-        },
-      },
-    },
-  });
-};
 
 export const createClientSupabaseClient = () => {
   console.log('🔧 Creating client Supabase client');
@@ -63,7 +28,7 @@ export const createClientSupabaseClient = () => {
       autoRefreshToken: true,
       detectSessionInUrl: true,
       flowType: 'pkce',
-      storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+      storage: typeof window !== 'undefined' ? window.localStorage : undefined
     },
   });
 
