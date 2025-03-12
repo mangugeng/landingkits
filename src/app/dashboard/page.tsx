@@ -5,7 +5,11 @@ import DashboardClient from './DashboardClient';
 export const dynamic = 'force-dynamic';
 export const runtime = 'edge';
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined }
+}) {
   console.log('📱 Dashboard page loading...');
   
   const supabase = createServerSupabaseClient();
@@ -20,7 +24,9 @@ export default async function DashboardPage() {
 
   if (!session) {
     console.log('🚫 No session found, redirecting to login');
-    redirect('/login');
+    const redirectUrl = new URL('/login', 'https://landingkits.com');
+    redirectUrl.searchParams.set('noLoop', 'true');
+    redirect(redirectUrl.toString());
   }
 
   console.log('✅ Session found, fetching templates');
@@ -32,6 +38,13 @@ export default async function DashboardPage() {
 
   if (templatesError) {
     console.error('❌ Error fetching templates:', templatesError.message);
+  }
+
+  // Hapus parameter noLoop dari URL jika ada
+  if (searchParams.noLoop) {
+    const url = new URL(window.location.href);
+    url.searchParams.delete('noLoop');
+    window.history.replaceState({}, '', url.toString());
   }
 
   return <DashboardClient initialTemplates={templates || []} user={session.user} />;

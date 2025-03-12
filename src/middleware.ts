@@ -34,8 +34,15 @@ export async function middleware(req: NextRequest) {
 
     // Jika user sudah login dan mencoba mengakses halaman login/register
     if (session && (req.nextUrl.pathname.startsWith('/login') || req.nextUrl.pathname.startsWith('/register'))) {
+      // Cek apakah sudah ada parameter noLoop untuk mencegah infinite redirect
+      if (req.nextUrl.searchParams.has('noLoop')) {
+        console.log('🔄 Preventing redirect loop');
+        return res;
+      }
+      
       console.log('✅ User already logged in, redirecting to dashboard');
       const redirectUrl = new URL('/dashboard', req.url);
+      redirectUrl.searchParams.set('noLoop', 'true');
       return NextResponse.redirect(redirectUrl);
     }
 
@@ -47,8 +54,9 @@ export async function middleware(req: NextRequest) {
     return res;
   } catch (error) {
     console.error('❌ Middleware error:', error);
-    // Jika terjadi error, arahkan ke halaman login
+    // Jika terjadi error, arahkan ke halaman login dengan parameter noLoop
     const redirectUrl = new URL('/login', req.url);
+    redirectUrl.searchParams.set('noLoop', 'true');
     return NextResponse.redirect(redirectUrl);
   }
 }
