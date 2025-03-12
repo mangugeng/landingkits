@@ -14,7 +14,8 @@ import {
   DragOverEvent,
 } from '@dnd-kit/core';
 import { useState } from 'react';
-import { useEditor } from '@/store/editor';
+import { useEditor, Block, BlockType } from '@/store/editor';
+import { nanoid } from 'nanoid';
 
 interface Props {
   children: ReactNode;
@@ -52,8 +53,13 @@ const DndProvider = ({ children }: Props) => {
     if (over && over.id === 'canvas') {
       const isTemplate = active.data.current?.isTemplate;
       if (isTemplate) {
-        const template = active.data.current?.template;
-        addBlock(template);
+        const type = active.data.current?.type as BlockType;
+        const newBlock: Block = {
+          id: nanoid(),
+          type,
+          props: {},
+        };
+        addBlock(newBlock);
       }
     }
 
