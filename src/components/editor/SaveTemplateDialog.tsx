@@ -53,8 +53,8 @@ const SaveTemplateDialog = ({ blocks, onClose, template }: SaveTemplateDialogPro
       // If domains are provided, update them
       if (formData.subdomain || formData.customDomain) {
         await updateTemplateDomain(savedTemplate.id, {
-          subdomain: formData.subdomain || null,
-          customDomain: formData.customDomain || null
+          subdomain: formData.subdomain || undefined,
+          customDomain: formData.customDomain || undefined
         });
       }
 

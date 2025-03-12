@@ -1,14 +1,14 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import type { User } from '@supabase/supabase-js';
 
 const SITE_URL = 'https://landingkits.com';
 const REDIRECT_URL = `${SITE_URL}/auth/callback`;
 
-let clientInstance: ReturnType<typeof createClient> | null = null;
+let clientInstance: ReturnType<typeof createSupabaseClient> | null = null;
 
 export type { User };
 
-export const createClientSupabaseClient = () => {
+export const createClient = () => {
   console.log('🔧 Creating client Supabase client');
   
   if (clientInstance) {
@@ -16,24 +16,11 @@ export const createClientSupabaseClient = () => {
     return clientInstance;
   }
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  if (!supabaseUrl || !supabaseKey) {
-    console.error('❌ Missing Supabase environment variables');
-    throw new Error('Missing Supabase environment variables');
-  }
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
   console.log('🆕 Creating new client instance');
-  clientInstance = createClient(supabaseUrl, supabaseKey, {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true,
-      flowType: 'pkce',
-      storage: typeof window !== 'undefined' ? window.localStorage : undefined
-    },
-  });
+  clientInstance = createSupabaseClient(supabaseUrl, supabaseAnonKey);
 
   return clientInstance;
 };
@@ -59,7 +46,7 @@ export interface Template {
 
 // Helper functions untuk auth
 export const signUp = async (email: string, password: string, fullName: string) => {
-  const supabase = createClientSupabaseClient();
+  const supabase = createClient();
   
   console.log('Using redirect URL:', REDIRECT_URL);
 
@@ -79,7 +66,7 @@ export const signUp = async (email: string, password: string, fullName: string) 
 export const signIn = async (email: string, password: string) => {
   console.log('🔑 Attempting to sign in with email:', email);
   
-  const supabase = createClientSupabaseClient();
+  const supabase = createClient();
   
   try {
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -106,14 +93,14 @@ export const signIn = async (email: string, password: string) => {
 };
 
 export const signOut = async () => {
-  const supabase = createClientSupabaseClient();
+  const supabase = createClient();
   const { error } = await supabase.auth.signOut();
   return { error };
 };
 
 // Helper functions untuk templates
 export const saveTemplate = async (template: Omit<Template, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
-  const supabase = createClientSupabaseClient();
+  const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Not authenticated');
 
@@ -132,7 +119,7 @@ export const saveTemplate = async (template: Omit<Template, 'id' | 'created_at' 
 };
 
 export const getTemplates = async (userId?: string) => {
-  const supabase = createClientSupabaseClient();
+  const supabase = createClient();
   let query = supabase
     .from('templates')
     .select('*');
