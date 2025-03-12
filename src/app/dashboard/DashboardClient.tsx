@@ -1,21 +1,50 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import { Template, signOut } from '@/lib/supabase';
-import { User } from '@supabase/supabase-js';
+import { useState, useEffect } from 'react';
+import { Template, User, createClientSupabaseClient } from '@/lib/supabase';
 
-interface DashboardClientProps {
-  initialTemplates: Template[];
-  user: User;
-}
-
-export default function DashboardClient({ initialTemplates, user }: DashboardClientProps) {
+export default function DashboardClient() {
   const router = useRouter();
-  const [templates, setTemplates] = useState(initialTemplates);
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadDashboardData = async () => {
+      try {
+        const supabase = createClientSupabaseClient();
+        
+        // Get session
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          router.push('/login?noLoop=true');
+          return;
+        }
+
+        setUser(session.user);
+
+        // Get templates
+        const { data: templates } = await supabase
+          .from('templates')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .order('created_at', { ascending: false });
+
+        setTemplates(templates || []);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error loading dashboard data:', error);
+        setLoading(false);
+      }
+    };
+
+    loadDashboardData();
+  }, [router]);
 
   const handleSignOut = async () => {
-    await signOut();
+    const supabase = createClientSupabaseClient();
+    await supabase.auth.signOut();
     router.push('/login');
   };
 
@@ -31,9 +60,11 @@ export default function DashboardClient({ initialTemplates, user }: DashboardCli
     if (!confirm('Apakah Anda yakin ingin menghapus template ini?')) return;
 
     try {
-      const { error } = await fetch(`/api/templates/${templateId}`, {
-        method: 'DELETE',
-      }).then(res => res.json());
+      const supabase = createClientSupabaseClient();
+      const { error } = await supabase
+        .from('templates')
+        .delete()
+        .eq('id', templateId);
 
       if (error) throw error;
       setTemplates(templates.filter(t => t.id !== templateId));
@@ -41,6 +72,25 @@ export default function DashboardClient({ initialTemplates, user }: DashboardCli
       console.error('Error deleting template:', error);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <nav className="bg-white shadow">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between h-16">
+              <div className="flex items-center">
+                <h1 className="text-xl font-bold">Dashboard</h1>
+              </div>
+            </div>
+          </div>
+        </nav>
+        <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+          <div className="text-center">Memuat data...</div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -51,7 +101,7 @@ export default function DashboardClient({ initialTemplates, user }: DashboardCli
               <h1 className="text-xl font-bold">Dashboard</h1>
             </div>
             <div className="flex items-center">
-              <span className="text-gray-700 mr-4">{user.email}</span>
+              <span className="text-gray-700 mr-4">{user?.email}</span>
               <button
                 onClick={handleSignOut}
                 className="text-gray-600 hover:text-gray-900"
