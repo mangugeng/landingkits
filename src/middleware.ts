@@ -16,6 +16,12 @@ export async function middleware(req: NextRequest) {
   });
 
   try {
+    // Jika ada parameter noLoop, skip middleware
+    if (req.nextUrl.searchParams.has('noLoop')) {
+      console.log('🔄 Skipping middleware due to noLoop parameter');
+      return res;
+    }
+
     const supabase = createMiddlewareClient({ req, res });
     const {
       data: { session },
@@ -29,17 +35,12 @@ export async function middleware(req: NextRequest) {
       console.log('🚫 Access denied: No session found, redirecting to login');
       const redirectUrl = new URL('/login', req.url);
       redirectUrl.searchParams.set('redirectTo', req.nextUrl.pathname);
+      redirectUrl.searchParams.set('noLoop', 'true');
       return NextResponse.redirect(redirectUrl);
     }
 
     // Jika user sudah login dan mencoba mengakses halaman login/register
     if (session && (req.nextUrl.pathname.startsWith('/login') || req.nextUrl.pathname.startsWith('/register'))) {
-      // Cek apakah sudah ada parameter noLoop untuk mencegah infinite redirect
-      if (req.nextUrl.searchParams.has('noLoop')) {
-        console.log('🔄 Preventing redirect loop');
-        return res;
-      }
-      
       console.log('✅ User already logged in, redirecting to dashboard');
       const redirectUrl = new URL('/dashboard', req.url);
       redirectUrl.searchParams.set('noLoop', 'true');

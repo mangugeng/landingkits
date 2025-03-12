@@ -20,14 +20,20 @@ export default function LoginPage() {
   useEffect(() => {
     const checkSession = async () => {
       try {
+        // Jika ada parameter noLoop, skip pengecekan sesi
+        if (searchParams.get('noLoop')) {
+          console.log('🔄 Skipping session check due to noLoop parameter');
+          setLoading(false);
+          return;
+        }
+
         console.log('🔍 Checking session...');
         const supabase = createClientSupabaseClient();
         const { data: { session } } = await supabase.auth.getSession();
         
         if (session) {
           console.log('🔑 Existing session found, redirecting to dashboard...');
-          // Use window.location for hard navigation
-          window.location.href = '/dashboard';
+          window.location.href = '/dashboard?noLoop=true';
           return;
         }
       } catch (error) {
@@ -37,7 +43,7 @@ export default function LoginPage() {
       }
     };
     checkSession();
-  }, []);
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,8 +70,8 @@ export default function LoginPage() {
       const redirectTo = searchParams.get('redirectTo') || '/dashboard';
       console.log('🔄 Redirecting to:', redirectTo);
       
-      // Force hard navigation
-      window.location.href = redirectTo;
+      // Force hard navigation with noLoop parameter
+      window.location.href = `${redirectTo}?noLoop=true`;
     } catch (error: any) {
       console.error('❌ Login error:', error);
       setError(error.message || 'Email atau password salah');
