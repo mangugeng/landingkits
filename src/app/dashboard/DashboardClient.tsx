@@ -211,11 +211,11 @@ export default function DashboardClient() {
                   className="bg-white overflow-hidden shadow rounded-lg"
                 >
                   <div className="p-5">
-                    <h3 className="text-lg font-medium text-gray-900">
+                    <h3 className="text-base font-semibold leading-6 text-gray-900">
                       {template.name}
                     </h3>
                     <p className="mt-1 text-sm text-gray-500">
-                      Dibuat: {new Date(template.createdAt).toLocaleDateString()}
+                      Dibuat: {new Date(template.created_at).toLocaleDateString()}
                     </p>
                     <div className="mt-4 flex space-x-3">
                       <button

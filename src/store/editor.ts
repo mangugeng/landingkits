@@ -314,9 +314,24 @@ const useEditor = create(
     }),
     {
       name: 'editor-storage',
-      partialize: (state) => ({ 
-        blocks: state.blocks,
-        templates: state.templates 
+      partialize: (state: EditorState) => ({
+        blocks: state.blocks || [],
+        templates: state.templates || [],
+        selectedBlock: null,
+        previewMode: false,
+        setBlocks: state.setBlocks,
+        addBlock: state.addBlock,
+        removeBlock: state.removeBlock,
+        reorderBlocks: state.reorderBlocks,
+        updateBlock: state.updateBlock,
+        setSelectedBlock: state.setSelectedBlock,
+        togglePreviewMode: state.togglePreviewMode,
+        saveTemplate: state.saveTemplate,
+        loadTemplate: state.loadTemplate,
+        deleteTemplate: state.deleteTemplate,
+        clearCanvas: state.clearCanvas,
+        selectBlock: state.selectBlock,
+        moveBlock: state.moveBlock
       }),
     }
   )
