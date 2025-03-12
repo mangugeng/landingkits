@@ -55,7 +55,11 @@ const nextConfig = {
                 headers: [
                     {
                         key: 'Access-Control-Allow-Origin',
-                        value: '*.landingkits.com',
+                        value: '*',
+                    },
+                    {
+                        key: 'Cache-Control',
+                        value: 'no-store, max-age=0',
                     },
                 ],
             },
