@@ -3,7 +3,8 @@ import { persist } from 'zustand/middleware';
 import { nanoid } from 'nanoid';
 import { Block, BlockType, BlockProps, HeroProps, NavbarProps, HeaderProps, FeaturesProps, ContentProps, StatsProps, TeamProps, FAQProps, TestimonialsProps, LogosProps, ReviewsProps, PricingProps, CTAProps, NewsletterProps, ContactProps, FooterProps, SimpleFooterProps } from '@/lib/types';
 
-export type { Block, BlockType, BlockProps };
+// Re-export types from lib/types
+export type { Block, BlockType, BlockProps } from '@/lib/types';
 
 export interface EditorTemplate {
   name: string;
