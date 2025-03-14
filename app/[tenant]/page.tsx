@@ -6,12 +6,10 @@ interface PageProps {
   params: {
     tenant: string
   }
-  searchParams: { [key: string]: string | string[] | undefined }
 }
 
 export default async function TenantPage({
   params,
-  searchParams,
 }: PageProps) {
   // Ambil data tenant dari Supabase
   const tenant = await getTenant(params.tenant)
