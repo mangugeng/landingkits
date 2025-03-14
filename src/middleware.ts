@@ -4,23 +4,40 @@ import type { NextRequest } from 'next/server'
 export function middleware(request: NextRequest) {
   const url = request.nextUrl
   const hostname = request.headers.get('host') || ''
-  const isLocalhost = hostname.includes('localhost')
   
-  // Jika mengakses melalui localhost, biarkan default routing
-  if (isLocalhost) {
+  // Mendukung localhost
+  if (hostname.includes('localhost')) {
     return NextResponse.next()
   }
 
-  // Jika mengakses domain utama landingkits.test
-  if (hostname === 'landingkits.test:3000') {
-    return NextResponse.next()
+  // Mendukung domain development (*.landingkits.test)
+  if (hostname.endsWith('landingkits.test:3000')) {
+    // Jika mengakses domain utama landingkits.test
+    if (hostname === 'landingkits.test:3000') {
+      return NextResponse.next()
+    }
+
+    // Jika mengakses subdomain (tenant)
+    const subdomain = hostname.split('.')[0]
+    if (subdomain) {
+      url.pathname = `/${subdomain}${url.pathname}`
+      return NextResponse.rewrite(url)
+    }
   }
 
-  // Jika mengakses subdomain (tenant)
-  const subdomain = hostname.split('.')[0]
-  if (subdomain && hostname.includes('landingkits.test:3000')) {
-    url.pathname = `/${subdomain}${url.pathname}`
-    return NextResponse.rewrite(url)
+  // Mendukung domain production (*.landingkits.com)
+  if (hostname.endsWith('landingkits.com')) {
+    // Jika mengakses domain utama landingkits.com
+    if (hostname === 'landingkits.com' || hostname === 'www.landingkits.com') {
+      return NextResponse.next()
+    }
+
+    // Jika mengakses subdomain (tenant)
+    const subdomain = hostname.split('.')[0]
+    if (subdomain) {
+      url.pathname = `/${subdomain}${url.pathname}`
+      return NextResponse.rewrite(url)
+    }
   }
 
   return NextResponse.next()
