@@ -6,6 +6,12 @@ const nextConfig = {
                 protocol: 'https',
                 hostname: '**',
             },
+            {
+                protocol: 'https',
+                hostname: 'raw.githubusercontent.com',
+                port: '',
+                pathname: '/mangugeng/assets/**',
+            },
         ],
     },
     async rewrites() {
