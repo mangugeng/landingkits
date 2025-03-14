@@ -2,11 +2,17 @@ import { notFound } from 'next/navigation'
 import { getTenant } from '@/lib/supabase'
 import Image from 'next/image'
 
+interface PageProps {
+  params: {
+    tenant: string
+  }
+  searchParams: { [key: string]: string | string[] | undefined }
+}
+
 export default async function TenantPage({
   params,
-}: {
-  params: { tenant: string }
-}) {
+  searchParams,
+}: PageProps) {
   // Ambil data tenant dari Supabase
   const tenant = await getTenant(params.tenant)
 
