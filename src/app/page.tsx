@@ -13,13 +13,13 @@ export default async function Home() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="relative w-[38px] h-[38px]">
-                <Image
+        <Image
                   src="/icon"
                   alt="Logo LandingKits"
                   fill
                   style={{ objectFit: "contain" }}
-                  priority
-                />
+          priority
+        />
               </div>
               <h1 className="text-2xl font-bold text-gray-900">
                 LandingKits
@@ -40,8 +40,8 @@ export default async function Home() {
               </Link>
               <Link
                 href="https://github.com/mangugeng/landingkits"
-                target="_blank"
-                rel="noopener noreferrer"
+            target="_blank"
+            rel="noopener noreferrer"
                 className="text-sm font-medium px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800"
               >
                 GitHub →
@@ -215,8 +215,8 @@ export default async function Home() {
                 <div key={tenant.id} className="group relative">
                   <div className="relative rounded-2xl overflow-hidden bg-white shadow-lg shadow-gray-100/50 hover:shadow-xl transition-all duration-200">
                     <div className="aspect-[4/3] relative overflow-hidden">
-                      <Image
-                        src={tenant.logo_url || '/placeholder.png'}
+            <Image
+                        src={tenant.logo || '/placeholder.png'}
                         alt={tenant.name}
                         className="object-cover w-full h-full transform group-hover:scale-105 transition-transform duration-300"
                         width={400}
@@ -225,9 +225,9 @@ export default async function Home() {
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                         <a
-                          href={tenant.domain}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                          href={`/${tenant.slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
                           className="inline-flex items-center px-4 py-2 bg-white text-gray-900 rounded-lg font-medium hover:bg-blue-50 transition-colors"
                         >
                           <span>Lihat Preview</span>
@@ -581,8 +581,8 @@ export default async function Home() {
               </Link>
               <Link
                 href="https://github.com/mangugeng/landingkits"
-                target="_blank"
-                rel="noopener noreferrer"
+          target="_blank"
+          rel="noopener noreferrer"
                 className="text-sm text-gray-600 hover:text-gray-900"
               >
                 GitHub
@@ -592,8 +592,8 @@ export default async function Home() {
               © {new Date().getFullYear()} LandingKits. Dibuat dengan{" "}
               <Link
                 href="https://nextjs.org"
-                target="_blank"
-                rel="noopener noreferrer"
+          target="_blank"
+          rel="noopener noreferrer"
                 className="text-blue-600 hover:underline"
               >
                 Next.js
@@ -601,8 +601,8 @@ export default async function Home() {
               {" "}dan{" "}
               <Link
                 href="https://supabase.com"
-                target="_blank"
-                rel="noopener noreferrer"
+          target="_blank"
+          rel="noopener noreferrer"
                 className="text-blue-600 hover:underline"
               >
                 Supabase
