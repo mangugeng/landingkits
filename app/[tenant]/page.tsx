@@ -1,16 +1,28 @@
 import { notFound } from 'next/navigation'
 import { getTenant } from '@/lib/supabase'
 import Image from 'next/image'
+import { Metadata } from 'next'
 
-interface PageProps {
-  params: {
-    tenant: string
+type Props = {
+  params: { tenant: string }
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const tenant = await getTenant(params.tenant)
+  
+  if (!tenant) {
+    return {
+      title: 'Tenant Not Found',
+    }
+  }
+
+  return {
+    title: tenant.name,
+    description: tenant.description,
   }
 }
 
-export default async function TenantPage({
-  params,
-}: PageProps) {
+export default async function TenantPage({ params }: Props) {
   // Ambil data tenant dari Supabase
   const tenant = await getTenant(params.tenant)
 
