@@ -14,6 +14,29 @@ const nextConfig = {
             },
         ],
     },
+    async headers() {
+        return [
+            {
+                source: '/:path*',
+                headers: [
+                    {
+                        key: 'Content-Security-Policy',
+                        value: [
+                            "default-src 'self'",
+                            "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+                            "style-src 'self' 'unsafe-inline'",
+                            "img-src 'self' https: data:",
+                            "font-src 'self'",
+                            "connect-src 'self' https://azybkaoytjcgdqrqanss.supabase.co",
+                            "frame-ancestors 'none'",
+                            "base-uri 'self'",
+                            "form-action 'self'",
+                        ].join('; ')
+                    }
+                ]
+            }
+        ]
+    },
     async rewrites() {
         return {
             beforeFiles: [

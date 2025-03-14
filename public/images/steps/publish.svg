@@ -1,0 +1,54 @@
+<svg width="600" height="400" viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Gradients -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stopColor="#F8FAFC"/>
+      <stop offset="100%" stopColor="#F1F5F9"/>
+    </linearGradient>
+    <linearGradient id="successGradient" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stopColor="#22C55E"/>
+      <stop offset="100%" stopColor="#16A34A"/>
+    </linearGradient>
+    <linearGradient id="infoGradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stopColor="#EFF6FF"/>
+      <stop offset="100%" stopColor="#BFDBFE"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background with curve -->
+  <path d="M0 0 h600 v300 q-300 100 -600 0 Z" fill="url(#bgGradient)"/>
+  
+  <!-- Browser Window -->
+  <g transform="translate(100, 50)">
+    <!-- Browser Frame -->
+    <g filter="drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1))">
+      <rect width="400" height="300" fill="white" stroke="#E2E8F0" strokeWidth="2" rx="8"/>
+      <path d="M0 0 h400 v40 q-200 10 -400 0 Z" fill="#F1F5F9" rx="8 8 0 0"/>
+      
+      <!-- Browser Controls -->
+      <circle cx="20" cy="20" r="6" fill="#EF4444"/>
+      <circle cx="40" cy="20" r="6" fill="#F59E0B"/>
+      <circle cx="60" cy="20" r="6" fill="#10B981"/>
+      
+      <!-- URL Bar with gradient -->
+      <rect x="80" y="12" width="240" height="16" fill="#E2E8F0" rx="4"/>
+      
+      <!-- Content -->
+      <g transform="translate(20, 60)">
+        <!-- Success Message with gradient and curve -->
+        <path d="M0 0 h360 v80 q-180 20 -360 0 Z" fill="#F0FDF4" rx="8"/>
+        <circle cx="40" cy="40" r="16" fill="url(#successGradient)"/>
+        <path d="M34 40 l4 4 l8 -8" stroke="white" strokeWidth="2" fill="none"/>
+        
+        <!-- Domain Info with gradient -->
+        <path d="M0 100 h360 v40 q-180 10 -360 0 Z" fill="url(#infoGradient)" rx="4"/>
+        <rect y="160" width="240" height="12" fill="#64748B" rx="2"/>
+        <rect y="180" width="180" height="8" fill="#E2E8F0" rx="2"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- Decorative Elements -->
+  <circle cx="50" cy="350" r="30" fill="#22C55E" opacity="0.1"/>
+  <circle cx="550" cy="50" r="40" fill="#22C55E" opacity="0.05"/>
+</svg> 
