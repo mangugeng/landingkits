@@ -16,6 +16,17 @@ export function middleware(request: NextRequest) {
 
   // Development mode
   if (process.env.NODE_ENV === 'development') {
+    // Handle local testing domains
+    if (hostname.endsWith('.landingkits.test')) {
+      const subdomain = hostname.replace('.landingkits.test', '')
+      if (subdomain !== 'www' && subdomain !== '') {
+        const newUrl = new URL(`/${subdomain}${path === '/' ? '' : path}`, `http://localhost:3000`)
+        console.log('Rewriting to:', newUrl.toString())
+        return NextResponse.rewrite(newUrl)
+      }
+      return NextResponse.next()
+    }
+
     // Root path
     if (path === '/') {
       return NextResponse.next()
@@ -23,25 +34,31 @@ export function middleware(request: NextRequest) {
     
     // Handle tenant paths
     const tenant = path.split('/')[1]
-    if (tenant && !['_next', 'api', 'static'].includes(tenant)) {
-      const newUrl = new URL(`/[tenant]${path.slice(tenant.length + 1) || '/'}`, request.url)
+    if (tenant && !['_next', 'api', 'static', 'favicon.ico'].includes(tenant)) {
+      const newUrl = new URL(`/${tenant}${path.slice(tenant.length + 1) || '/'}`, request.url)
       console.log('Rewriting to:', newUrl.toString())
       return NextResponse.rewrite(newUrl)
     }
   } 
   // Production mode
   else {
-    // Main domain
-    if (hostname === 'landingkits.com' || hostname === 'www.landingkits.com') {
+    // Main domains
+    const allowedDomains = ['landingkits.com', 'www.landingkits.com', 'landingkits.vercel.app']
+    if (allowedDomains.includes(hostname)) {
       return NextResponse.next()
     }
 
     // Tenant subdomains
-    const subdomain = hostname.split('.')[0]
-    if (subdomain !== 'www') {
-      const newUrl = new URL(`/[tenant]${path}`, request.url)
-      console.log('Rewriting to:', newUrl.toString())
-      return NextResponse.rewrite(newUrl)
+    const isVercelDomain = hostname.endsWith('.vercel.app')
+    const isCustomDomain = hostname.endsWith('.landingkits.com')
+    
+    if (isVercelDomain || isCustomDomain) {
+      const subdomain = hostname.split('.')[0]
+      if (subdomain !== 'www') {
+        const newUrl = new URL(`/${subdomain}${path === '/' ? '' : path}`, request.url)
+        console.log('Rewriting to:', newUrl.toString())
+        return NextResponse.rewrite(newUrl)
+      }
     }
   }
 
@@ -50,6 +67,6 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!api|_next|static|.*\\..*|_vercel|[\\w-]+\\.\\w+).*)'
+    '/((?!_next/static|_next/image|favicon.ico).*)'
   ],
 } 

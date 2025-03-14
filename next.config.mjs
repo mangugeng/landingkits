@@ -8,6 +8,23 @@ const nextConfig = {
             },
         ],
     },
+    async rewrites() {
+        return {
+            beforeFiles: [
+                // Handle tenant subdomains in development
+                {
+                    source: '/:path*',
+                    has: [
+                        {
+                            type: 'host',
+                            value: '(?<tenant>[^.]+).landingkits.test:3000',
+                        },
+                    ],
+                    destination: '/:tenant/:path*',
+                },
+            ],
+        }
+    },
 }
 
 export default nextConfig 
