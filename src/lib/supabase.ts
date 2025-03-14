@@ -42,4 +42,32 @@ export async function getTenant(slug: string) {
   }
 
   return tenant as Tenant
+}
+
+// Fungsi untuk upload gambar ke Supabase Storage
+export async function uploadImage(file: File, path: string) {
+  const { data, error } = await supabase.storage
+    .from('landingkits')
+    .upload(path, file)
+
+  if (error) {
+    console.error('Error uploading:', error)
+    return null
+  }
+
+  // Dapatkan URL publik dari gambar
+  const { data: { publicUrl } } = supabase.storage
+    .from('landingkits')
+    .getPublicUrl(path)
+
+  return publicUrl
+}
+
+// Fungsi untuk mendapatkan URL publik gambar
+export function getImageUrl(path: string) {
+  const { data: { publicUrl } } = supabase.storage
+    .from('landingkits')
+    .getPublicUrl(path)
+
+  return publicUrl
 } 

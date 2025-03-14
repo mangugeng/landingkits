@@ -1,23 +1,25 @@
 import { supabase } from './supabase'
 
+const STORAGE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL + '/storage/v1/object/public/landingkits'
+
 const tenants = [
   {
     name: 'Startup Kit',
     slug: 'startup',
     description: 'Landing page untuk startup modern - Template yang sempurna untuk memperkenalkan produk inovatif Anda.',
-    logo: 'https://raw.githubusercontent.com/mangugeng/assets/main/startup.png'
+    logo: `${STORAGE_URL}/logos/startup.png`
   },
   {
     name: 'Agency Kit',
     slug: 'agency',
     description: 'Landing page untuk agensi kreatif - Tampilkan portofolio dan layanan digital agency Anda dengan elegan.',
-    logo: 'https://raw.githubusercontent.com/mangugeng/assets/main/agency.png'
+    logo: `${STORAGE_URL}/logos/agency.png`
   },
   {
     name: 'Business Kit',
     slug: 'business',
     description: 'Landing page untuk bisnis profesional - Template yang cocok untuk perusahaan dan layanan B2B.',
-    logo: 'https://raw.githubusercontent.com/mangugeng/assets/main/business.png'
+    logo: `${STORAGE_URL}/logos/business.png`
   }
 ]
 

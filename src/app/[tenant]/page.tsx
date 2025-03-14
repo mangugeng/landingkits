@@ -29,6 +29,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
+const STORAGE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL + '/storage/v1/object/public/landingkits'
+
 const tenantContent: Record<string, {
   hero: string
   features: Array<{
@@ -38,7 +40,7 @@ const tenantContent: Record<string, {
   }>
 }> = {
   startup: {
-    hero: 'https://raw.githubusercontent.com/mangugeng/assets/main/startup-hero.jpg',
+    hero: `${STORAGE_URL}/heroes/startup-hero.jpg`,
     features: [
       {
         title: 'Modern & Responsif',
@@ -58,7 +60,7 @@ const tenantContent: Record<string, {
     ]
   },
   agency: {
-    hero: 'https://raw.githubusercontent.com/mangugeng/assets/main/agency-hero.jpg',
+    hero: `${STORAGE_URL}/heroes/agency-hero.jpg`,
     features: [
       {
         title: 'Portofolio Dinamis',
@@ -78,7 +80,7 @@ const tenantContent: Record<string, {
     ]
   },
   business: {
-    hero: 'https://raw.githubusercontent.com/mangugeng/assets/main/business-hero.jpg',
+    hero: `${STORAGE_URL}/heroes/business-hero.jpg`,
     features: [
       {
         title: 'Profesional & Elegan',
