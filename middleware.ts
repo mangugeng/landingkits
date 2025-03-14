@@ -4,37 +4,45 @@ import type { NextRequest } from 'next/server'
 export function middleware(request: NextRequest) {
   const url = request.nextUrl
   const hostname = request.headers.get('host') || ''
+  const path = url.pathname
   
-  // Untuk development environment
-  const isDev = process.env.NODE_ENV === 'development'
-  
-  // Mendapatkan tenant dari hostname
-  let tenant: string | null = null
-  
-  if (isDev) {
-    // Di development, kita menggunakan path untuk tenant
-    // contoh: localhost:3000/tenant-name
-    tenant = url.pathname.split('/')[1]
-  } else {
-    // Di production, kita menggunakan subdomain
-    // contoh: tenant-name.landingkits.com
-    tenant = hostname.replace('.landingkits.com', '')
-  }
+  // Debug logging
+  console.log('Request:', {
+    hostname,
+    path,
+    isDev: process.env.NODE_ENV === 'development',
+    url: url.toString()
+  })
 
-  // Jika mengakses root domain
-  if (hostname === 'landingkits.com' || 
-      (isDev && hostname === 'localhost:3000' && url.pathname === '/')) {
-    return NextResponse.next()
-  }
-
-  // Jika ada tenant, arahkan ke halaman tenant
-  if (tenant) {
-    // Hapus tenant dari pathname jika di development
-    const pathname = isDev ? url.pathname.replace(`/${tenant}`, '') || '/' : url.pathname
+  // Development mode
+  if (process.env.NODE_ENV === 'development') {
+    // Root path
+    if (path === '/') {
+      return NextResponse.next()
+    }
     
-    return NextResponse.rewrite(
-      new URL(`/${tenant}${pathname}`, request.url)
-    )
+    // Handle tenant paths
+    const tenant = path.split('/')[1]
+    if (tenant && !['_next', 'api', 'static'].includes(tenant)) {
+      const newUrl = new URL(`/[tenant]${path.slice(tenant.length + 1) || '/'}`, request.url)
+      console.log('Rewriting to:', newUrl.toString())
+      return NextResponse.rewrite(newUrl)
+    }
+  } 
+  // Production mode
+  else {
+    // Main domain
+    if (hostname === 'landingkits.com' || hostname === 'www.landingkits.com') {
+      return NextResponse.next()
+    }
+
+    // Tenant subdomains
+    const subdomain = hostname.split('.')[0]
+    if (subdomain !== 'www') {
+      const newUrl = new URL(`/[tenant]${path}`, request.url)
+      console.log('Rewriting to:', newUrl.toString())
+      return NextResponse.rewrite(newUrl)
+    }
   }
 
   return NextResponse.next()
@@ -42,13 +50,6 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all paths except for:
-     * 1. /api routes
-     * 2. /_next (Next.js internals)
-     * 3. /static (inside /public)
-     * 4. all root files inside /public (e.g. /favicon.ico)
-     */
-    '/((?!api|_next|static|[\\w-]+\\.\\w+).*)',
+    '/((?!api|_next|static|.*\\..*|_vercel|[\\w-]+\\.\\w+).*)'
   ],
 } 

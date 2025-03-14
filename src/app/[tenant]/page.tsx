@@ -3,12 +3,15 @@ import { getTenant } from '@/lib/supabase'
 import Image from 'next/image'
 import { Metadata } from 'next'
 
-type PageParams = {
-  params: { tenant: string }
+interface PageProps {
+  params: Promise<{
+    tenant: string
+  }>
 }
 
-export async function generateMetadata({ params }: PageParams): Promise<Metadata> {
-  const tenant = await getTenant(params.tenant)
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { tenant: tenantSlug } = await params
+  const tenant = await getTenant(tenantSlug)
   
   if (!tenant) {
     return {
@@ -22,11 +25,10 @@ export async function generateMetadata({ params }: PageParams): Promise<Metadata
   }
 }
 
-export default async function TenantPage({ params }: PageParams) {
-  // Ambil data tenant dari Supabase
-  const tenant = await getTenant(params.tenant)
+export default async function TenantPage({ params }: PageProps) {
+  const { tenant: tenantSlug } = await params
+  const tenant = await getTenant(tenantSlug)
 
-  // Jika tenant tidak ditemukan
   if (!tenant) {
     notFound()
   }
@@ -66,8 +68,8 @@ export default async function TenantPage({ params }: PageParams) {
           <div className="mt-8 pt-6 border-t border-gray-100">
             <h3 className="text-lg font-medium mb-2">Akses Website</h3>
             <ul className="space-y-2 text-blue-600">
-              <li>• {params.tenant}.landingkits.com (production)</li>
-              <li>• localhost:3000/{params.tenant} (development)</li>
+              <li>• {tenantSlug}.landingkits.com (production)</li>
+              <li>• localhost:3000/{tenantSlug} (development)</li>
             </ul>
           </div>
         </div>
